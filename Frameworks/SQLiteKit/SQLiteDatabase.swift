@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import FMDB
 import SQLite3
 
 func dbLog(_ text: String) {

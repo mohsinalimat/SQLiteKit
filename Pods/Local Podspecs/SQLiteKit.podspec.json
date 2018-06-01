@@ -1,26 +1,26 @@
 {
   "name": "SQLiteKit",
-  "version": "0.0.1",
-  "license": "MIT",
+  "version": "0.0.2",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
   "requires_arc": true,
   "source": {
-    "path": "DevelopmentPods/SQLiteKit"
+    "git": "https://github.com/alexiscn/SQLiteKit.git",
+    "tag": "0.0.2"
   },
   "summary": "SQLiteKit for PhotoX",
-  "homepage": "No homepage",
+  "homepage": "https://github.com/alexiscn/SQLiteKit",
   "authors": {
     "xushuifeng": "shuifengxu@gmail.com"
   },
   "platforms": {
     "ios": "10.0"
   },
+  "swift_version": "4.0",
   "source_files": [
     "*.{h,m,swift}",
     "**/*.{h,m,swift}"
-  ],
-  "dependencies": {
-    "FMDB": [
-
-    ]
-  }
+  ]
 }
