@@ -13,7 +13,5 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '10.0'
   s.swift_version = '4.0'
   s.source_files = '*.{h,m,swift}', '**/*.{h,m,swift}'
-  s.private_header_files = '**/FMDB/*.h'
-  s.public_header_files = '**/FMDB/FMDB.h'
 
 end
