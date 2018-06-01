@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.version      = '0.0.1'
   s.license = 'MIT'
   s.requires_arc = true
-  s.source = { :path => 'DevelopmentPods/SQLiteKit' }
+  s.source = { :git => 'https://github.com/alexiscn/SQLiteKit.git', :tag => s.version.to_s }
 
   s.summary = 'SQLiteKit for PhotoX'
   s.homepage = 'No homepage'
