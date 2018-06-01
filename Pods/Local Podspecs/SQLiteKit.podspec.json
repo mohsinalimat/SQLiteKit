@@ -23,5 +23,5 @@
     "*.{h,m,swift}",
     "**/*.{h,m,swift}"
   ],
-  "private_header_files": "FMDB/*.h"
+  "private_header_files": "**/FMDB/*.h"
 }
