@@ -10,9 +10,9 @@ import Foundation
 
 public class SQLiteTable {
     
-    private let db: SQLiteDatabase
+    fileprivate let db: SQLiteDatabase
     
-    private let tableName: String
+    fileprivate let tableName: String
     
     public init(database: SQLiteDatabase, tableName: String) {
         self.db = database

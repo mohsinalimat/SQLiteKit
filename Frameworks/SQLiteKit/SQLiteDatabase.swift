@@ -27,11 +27,11 @@ public class SQLiteDatabase {
     
     public static var enableLog = false
     
-    private var dbQueue: FMDatabaseQueue
-    private var enableDebugLog: Bool = false
-    private var transactionCounter: Int = 0
-    private var collectionCache: NSMutableDictionary = NSMutableDictionary(capacity: 20)
-    private var lock = Lock()
+    fileprivate var dbQueue: FMDatabaseQueue
+    fileprivate var enableDebugLog: Bool = false
+    fileprivate var transactionCounter: Int = 0
+    fileprivate var collectionCache: NSMutableDictionary = NSMutableDictionary(capacity: 20)
+    fileprivate var lock = Lock()
     
     public init(path: String) {
         let flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FILEPROTECTION_NONE
