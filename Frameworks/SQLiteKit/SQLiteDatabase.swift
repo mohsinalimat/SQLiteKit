@@ -8,6 +8,7 @@
 
 import Foundation
 import SQLite3
+import FMDB
 
 func dbLog(_ text: String) {
     if SQLiteDatabase.enableLog {

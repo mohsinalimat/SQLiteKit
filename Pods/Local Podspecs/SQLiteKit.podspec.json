@@ -18,10 +18,7 @@
     "ios": "10.0"
   },
   "swift_version": "4.0",
-  "source_files": [
-    "*.{h,m,swift}",
-    "**/*.{h,m,swift}"
-  ],
+  "source_files": "**/*.{swift}",
   "ios": {
     "dependencies": {
       "FMDB": [
