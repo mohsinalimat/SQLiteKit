@@ -10,7 +10,3 @@
 #endif
 #endif
 
-
-FOUNDATION_EXPORT double SQLiteKitVersionNumber;
-FOUNDATION_EXPORT const unsigned char SQLiteKitVersionString[];
-
