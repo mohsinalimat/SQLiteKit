@@ -23,5 +23,7 @@
     "*.{h,m,swift}",
     "**/*.{h,m,swift}"
   ],
-  "private_header_files": "**/FMDB/*.h"
+  "pod_target_xcconfig": {
+    "": "SQLiteKitBridingHeader.h"
+  }
 }

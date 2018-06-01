@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: Frameworks/SQLiteKit
 
 SPEC CHECKSUMS:
-  SQLiteKit: 84fcaea776920f169fcb84b233e7b4b1c64be70d
+  SQLiteKit: c5bae0ab22b8d26f2f64a0ef4bdae6824c6aca38
 
 PODFILE CHECKSUM: 2e00a54686f94f1424ddc2509c28708d3c7e3fb2
 
