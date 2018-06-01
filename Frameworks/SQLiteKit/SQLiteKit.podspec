@@ -7,12 +7,12 @@ Pod::Spec.new do |s|
 
   s.summary = 'SQLiteKit based on FMDB and Swift Codable'
   s.homepage = 'https://github.com/alexiscn/SQLiteKit'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
+  s.license          = { :type => 'MIT' }
   s.author       = { 'xushuifeng' => 'shuifengxu@gmail.com' }
   s.platform     = :ios
   s.ios.deployment_target = '10.0'
   s.swift_version = '4.0'
   s.source_files = '*.{h,m,swift}', '**/*.{h,m,swift}'
 #  s.private_header_files = '**/FMDB/*.h'
-  
+
 end
