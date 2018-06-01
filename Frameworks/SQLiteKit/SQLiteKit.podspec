@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SQLiteKit'
-  s.version      = '0.0.6'
+  s.version      = '0.0.7'
   s.license = 'MIT'
   s.requires_arc = true
   s.source = { :git => 'https://github.com/alexiscn/SQLiteKit.git', :tag => s.version.to_s }
@@ -14,4 +14,5 @@ Pod::Spec.new do |s|
   s.swift_version = '4.0'
   s.source_files = '*.{h,m,swift}', '**/*.{h,m,swift}'
 
+  s.library = 'sqlite3'
 end
