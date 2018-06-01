@@ -1,6 +1,6 @@
 {
   "name": "SQLiteKit",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -8,7 +8,7 @@
   "requires_arc": true,
   "source": {
     "git": "https://github.com/alexiscn/SQLiteKit.git",
-    "tag": "0.0.2"
+    "tag": "0.0.3"
   },
   "summary": "SQLiteKit for PhotoX",
   "homepage": "https://github.com/alexiscn/SQLiteKit",
@@ -22,5 +22,6 @@
   "source_files": [
     "*.{h,m,swift}",
     "**/*.{h,m,swift}"
-  ]
+  ],
+  "private_header_files": "FMDB/*.h"
 }

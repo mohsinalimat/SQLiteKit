@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0058CEA3D70BA9C16036D8FC6857F94E /* FMDB.h in Headers */ = {isa = PBXBuildFile; fileRef = B9076F21792BEEDB137155BF12A8996B /* FMDB.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		02B3F45273BF8E865984D9C4BBC79D5E /* SQLiteTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0D60F298E3241490A024E28B4AB3074 /* SQLiteTable.swift */; };
 		04230DE80D3FD833429C50DAA770615B /* SQLiteKit-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = E7B4A38706EE95742D43D82747E5F898 /* SQLiteKit-dummy.m */; };
+		0EB2C42686012937F03427747D610252 /* FMDatabasePool.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B53D9E90C64593C457E3BE38F70F66 /* FMDatabasePool.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		1CA4FAA57E3EC45449EEFABF69327BE3 /* SQLiteKit-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = AB9B93503A1078EF0B3237671DE06DB9 /* SQLiteKit-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		42BC65642B852E6F7CF01A2298824339 /* FMDatabase.m in Sources */ = {isa = PBXBuildFile; fileRef = 33D0F7EFCF0A808EEC4C13BA615916F8 /* FMDatabase.m */; };
-		496E3EE9946CCAB4B29A6DA64FB1AC55 /* FMDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = B85CB25D5CC0E0DDC1ACA54E40D8D4F6 /* FMDatabase.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		54E4DCF9CF330C8AF556CA6A552C2084 /* Pods-SQLiteKitDemo-umbrella.h in Headers */ = {isa = PBXBuildFile; fileRef = D4CF86211697DC1F890DA11FF01709EA /* Pods-SQLiteKitDemo-umbrella.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		587253FF7F1B48C2356169899EAED07E /* FMDB.h in Headers */ = {isa = PBXBuildFile; fileRef = B9076F21792BEEDB137155BF12A8996B /* FMDB.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		5F887DB8D92873E272E4E4E3F0ECB575 /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDA2B4F1C954D12A8AC8E239B4200CFC /* SQLiteDatabase.swift */; };
+		73344A38B9C1AAFA3DF62C87BBD1A26D /* FMDatabaseQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D769F7A6228B4F74068CD1C5A4B5AF8 /* FMDatabaseQueue.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		7DA546302FD45B6360BC61FE2FB12503 /* Pods-SQLiteKitDemo-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 5C980F974D1DFDF40E98D1DA5DDB0450 /* Pods-SQLiteKitDemo-dummy.m */; };
-		852FD21DBF494975CD2801ED03296EDB /* FMDatabaseQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 0D769F7A6228B4F74068CD1C5A4B5AF8 /* FMDatabaseQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		86411E1EE630A448C1DA94A4D707059C /* FMDatabaseQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 093E5747642E84C20F759B3AB67E06D6 /* FMDatabaseQueue.m */; };
 		88111A0E0C8A0106C00506342BA59325 /* SQLiteColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D89E0AE1B1991F748A3F4B389EF915C /* SQLiteColumn.swift */; };
+		8AE822614289B5FD1216118014B2D118 /* FMDatabase.h in Headers */ = {isa = PBXBuildFile; fileRef = B85CB25D5CC0E0DDC1ACA54E40D8D4F6 /* FMDatabase.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		8E7194820F44FF756FDBCCDA5E2E01A8 /* FMDatabasePool.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B53752C10C3E78873F95A3C8CB63FCB /* FMDatabasePool.m */; };
 		909A242452F7E1933560E94854C0A1C8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */; };
 		94B9ADA13F02BD9E3126BC2EC4AEF362 /* FMDatabaseAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 69565E77F4FBC44568009BA76D976315 /* FMDatabaseAdditions.m */; };
+		97CEEA4CB5A05C1DD4AA08A4C587082C /* FMDatabaseAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 901AF1703BC28CB2E6A7B1BDCFC42E73 /* FMDatabaseAdditions.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		9BD7B3127D0613D4A844E762A3996A81 /* SQLiteRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3E3C9D836EF6109BC6D036F6B3B0FDF /* SQLiteRow.swift */; };
-		9D1A1B8BC652FEC14BBA3543AF8FFE0A /* FMDatabaseAdditions.h in Headers */ = {isa = PBXBuildFile; fileRef = 901AF1703BC28CB2E6A7B1BDCFC42E73 /* FMDatabaseAdditions.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9EBCE8EFA3D347AEF85B131CE1990797 /* FMResultSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CB2C22626C9423E599F174A0C9320ADC /* FMResultSet.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9D319F2CBC7FCF9BD57593C5F1C1A04C /* FMResultSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CB2C22626C9423E599F174A0C9320ADC /* FMResultSet.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		AEE69CC0E978BA66CB841B190FC91C80 /* SQLiteModelProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 678E7944063D2F99FD5EA44BEBF95F2A /* SQLiteModelProtocol.swift */; };
-		C0E3DB530B6532D4607AF1C63126A74E /* FMDatabasePool.h in Headers */ = {isa = PBXBuildFile; fileRef = F5B53D9E90C64593C457E3BE38F70F66 /* FMDatabasePool.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E7E81D00F500D7FE4C4B13BAEFED82DC /* FMResultSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 357C750C43F261299EF76C16778F76D8 /* FMResultSet.m */; };
 		F52DCBC89E63BB9CE292A247CEE1CE70 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6604A7D69453B4569E4E4827FB9155A9 /* Foundation.framework */; };
 /* End PBXBuildFile section */
@@ -245,12 +245,12 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				496E3EE9946CCAB4B29A6DA64FB1AC55 /* FMDatabase.h in Headers */,
-				9D1A1B8BC652FEC14BBA3543AF8FFE0A /* FMDatabaseAdditions.h in Headers */,
-				C0E3DB530B6532D4607AF1C63126A74E /* FMDatabasePool.h in Headers */,
-				852FD21DBF494975CD2801ED03296EDB /* FMDatabaseQueue.h in Headers */,
-				0058CEA3D70BA9C16036D8FC6857F94E /* FMDB.h in Headers */,
-				9EBCE8EFA3D347AEF85B131CE1990797 /* FMResultSet.h in Headers */,
+				8AE822614289B5FD1216118014B2D118 /* FMDatabase.h in Headers */,
+				97CEEA4CB5A05C1DD4AA08A4C587082C /* FMDatabaseAdditions.h in Headers */,
+				0EB2C42686012937F03427747D610252 /* FMDatabasePool.h in Headers */,
+				73344A38B9C1AAFA3DF62C87BBD1A26D /* FMDatabaseQueue.h in Headers */,
+				587253FF7F1B48C2356169899EAED07E /* FMDB.h in Headers */,
+				9D319F2CBC7FCF9BD57593C5F1C1A04C /* FMResultSet.h in Headers */,
 				1CA4FAA57E3EC45449EEFABF69327BE3 /* SQLiteKit-umbrella.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
