@@ -1,16 +1,15 @@
 {
   "name": "SQLiteKit",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": {
-    "type": "MIT",
-    "file": "LICENSE"
+    "type": "MIT"
   },
   "requires_arc": true,
   "source": {
     "git": "https://github.com/alexiscn/SQLiteKit.git",
-    "tag": "0.0.3"
+    "tag": "0.0.4"
   },
-  "summary": "SQLiteKit for PhotoX",
+  "summary": "SQLiteKit based on FMDB and Swift Codable",
   "homepage": "https://github.com/alexiscn/SQLiteKit",
   "authors": {
     "xushuifeng": "shuifengxu@gmail.com"
@@ -22,8 +21,5 @@
   "source_files": [
     "*.{h,m,swift}",
     "**/*.{h,m,swift}"
-  ],
-  "pod_target_xcconfig": {
-    "": "SQLiteKitBridingHeader.h"
-  }
+  ]
 }
