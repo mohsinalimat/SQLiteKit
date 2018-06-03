@@ -98,4 +98,15 @@ extension SQLiteTable {
         return db.executeQuery(sql)
     }
     
+    public func `where`() {
+        
+    }
+    
+    public func orderBy() {
+        
+    }
+    
+    public func limit(_ count: Int) {
+        
+    }
 }

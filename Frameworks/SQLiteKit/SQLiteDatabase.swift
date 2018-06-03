@@ -25,6 +25,8 @@ func dbLog(_ text: String) {
 ///
 public class SQLiteDatabase {
     
+    
+    /// you can set enableLog to `true` to view verbose log
     public static var enableLog = false
     
     fileprivate var dbQueue: FMDatabaseQueue

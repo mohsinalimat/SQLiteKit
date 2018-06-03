@@ -36,6 +36,15 @@ public struct SQLiteColumn: CustomStringConvertible {
     /// whether should create index. Default to `false`
     public var createIndex: Bool = false
     
+    public var nonnull: Bool = false
+    
+    public var unique: Bool = false
+    
+    /// Create a `SQLiteColumn` with name and dataType
+    ///
+    /// - Parameters:
+    ///   - name: name of column
+    ///   - dataType: dataTyp of column
     public init(name: String, dataType: SQLiteDataType) {
         self.name = name
         self.dataType = dataType
@@ -49,6 +58,12 @@ public struct SQLiteColumn: CustomStringConvertible {
             }
             if autoIncrement {
                 sql += " AUTOINCREMENT"
+            }
+            if unique {
+                sql += " UNIQUE"
+            }
+            if nonnull {
+                sql += ""
             }
             return sql
         }
