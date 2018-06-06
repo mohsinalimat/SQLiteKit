@@ -3,7 +3,7 @@
 //  SQLiteKit
 //
 //  Created by xu.shuifeng on 2018/5/24.
-//  Copyright © 2018 Meteor. All rights reserved.
+//  Copyright © 2018 me.shuifeng. All rights reserved.
 //
 
 import Foundation

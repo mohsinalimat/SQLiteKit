@@ -3,7 +3,7 @@
 //  SQLiteKit
 //
 //  Created by xu.shuifeng on 2018/5/24.
-//  Copyright © 2018 Meteor. All rights reserved.
+//  Copyright © 2018 me.shuifeng. All rights reserved.
 //
 
 import Foundation
@@ -218,34 +218,35 @@ extension SQLiteDatabase {
     public func createTable<T: SQLiteModelProtocol>(_ table: T.Type) {
         let tableName = table.tableName
         if exists(tableName) {
-            return
-        }
-        var columns = table.columns
-        var rowid = SQLiteColumn(name: "_rowid", dataType: .int)
-        rowid.autoIncrement = true
-        rowid.primaryKey = true
-        
-        columns.insert(rowid, at: 0)
-        
-        // create table
-        var createSQL = "CREATE TABLE \(tableName) ("
-        for col in columns {
-            createSQL += col.description + ", "
-        }
-        createSQL = String(createSQL.dropLast(2))
-        createSQL += ");"
-        executeUpdate(createSQL)
-        dbLog(createSQL)
-        
-        // create indexes
-        let indexColumns = columns.filter { return $0.createIndex }
-        if indexColumns.count > 0 {
-            beginTransaction()
-            for column in indexColumns {
-                let sql = String(format: "CREATE INDEX index_%@ on %@ (%@);", column.name, tableName, column.name)
-                executeUpdate(sql)
+            
+        } else {
+            var columns = table.columns
+            var rowid = SQLiteColumn(name: "_rowid", dataType: .int)
+            rowid.autoIncrement = true
+            rowid.primaryKey = true
+            
+            columns.insert(rowid, at: 0)
+            
+            // create table
+            var createSQL = "CREATE TABLE \(tableName) ("
+            for col in columns {
+                createSQL += col.description + ", "
             }
-            commitTransaction()
+            createSQL = String(createSQL.dropLast(2))
+            createSQL += ");"
+            executeUpdate(createSQL)
+            dbLog(createSQL)
+            
+            // create indexes
+            let indexColumns = columns.filter { return $0.createIndex }
+            if indexColumns.count > 0 {
+                beginTransaction()
+                for column in indexColumns {
+                    let sql = String(format: "CREATE INDEX index_%@ on %@ (%@);", column.name, tableName, column.name)
+                    executeUpdate(sql)
+                }
+                commitTransaction()
+            }
         }
     }
     

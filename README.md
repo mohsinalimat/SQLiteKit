@@ -1,4 +1,8 @@
+## Features
 
+- [x] ORM 
+- [] 
+- [] Dynamic add column
 
 
 ## Requirements
@@ -73,6 +77,14 @@ func createDatabase() {
  }
  ```
 
+ #### 4. add new column
+
+ just add new column in your Table model. SQLiteKit automatically alter table and add new columns.
+
 ## Author
 
 alexiscn
+
+## License
+
+SQLiteKit is released under the MIT license. [See LICENSE](https://github.com/alexiscn/SQLiteKit/blob/master/LICENSE) for details.
