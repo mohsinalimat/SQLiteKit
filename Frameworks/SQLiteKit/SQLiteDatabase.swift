@@ -218,7 +218,29 @@ extension SQLiteDatabase {
     public func createTable<T: SQLiteModelProtocol>(_ table: T.Type) {
         let tableName = table.tableName
         if exists(tableName) {
+            // check if got new columns
+            let sql = "PRAGMA table_info('\(tableName)');"
+            let rows = executeQuery(sql)
+            var existsColumns: [String] = []
+            rows.forEach { (row) in
+                if let name = row.dataDict["name"] as? String {
+                    existsColumns.append(name)
+                }
+            }
             
+            let newColumns = T.columns.filter { column -> Bool in
+                return !existsColumns.contains(column.name)
+            }
+            
+            if newColumns.count > 0 {
+                beginTransaction()
+                for column in newColumns {
+                    let alertSQL = "ALTER TABLE \(tableName) ADD COLUMN " + column.description
+                    executeUpdate(alertSQL)
+                }
+                commitTransaction()
+            }
+
         } else {
             var columns = table.columns
             var rowid = SQLiteColumn(name: "_rowid", dataType: .int)

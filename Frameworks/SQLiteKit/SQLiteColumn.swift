@@ -56,15 +56,17 @@ public struct SQLiteColumn: CustomStringConvertible {
             if primaryKey {
                 sql += " PRIMARY KEY"
             }
-            if autoIncrement {
+            // only `INTEGER` type can apply AUTOINCREMENT
+            if autoIncrement && dataType == .int {
                 sql += " AUTOINCREMENT"
+            }
+            if nonnull {
+                sql += " NOT NULL"
             }
             if unique {
                 sql += " UNIQUE"
             }
-            if nonnull {
-                sql += ""
-            }
+            
             return sql
         }
     }
