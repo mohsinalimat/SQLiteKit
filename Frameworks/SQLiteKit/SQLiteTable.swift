@@ -81,11 +81,18 @@ extension SQLiteTable {
     }
     
     @discardableResult
-    public func update<T: SQLiteModelProtocol>(_ model: T) -> Bool {
-        return false
+    public func upsert<T: SQLiteModelProtocol>(_ model: T) -> Bool {
+        let columns = T.columns
+        let fields = columns.map { return $0.name }.joined(separator: ",")
+        let placeholders = Array(repeating: "?", count: columns.count).joined(separator: ",")
+        let sql = String(format: "REPLACE INTO %@ (%@) VALUES (%@);", T.tableName, fields, placeholders)
+        dbLog(sql)
+        return db.executeUpdate(sql, withArgumentsIn: model.values)
     }
 }
 
+
+// MARK: - Read Related APIs
 extension SQLiteTable {
     
     
@@ -98,15 +105,30 @@ extension SQLiteTable {
         return db.executeQuery(sql)
     }
     
-    public func `where`() {
-        
+    public func findAll() -> SQLiteRowList? {
+        let sql = "SELECT * FROM \(tableName)"
+        return db.executeQuery(sql)
     }
     
-    public func orderBy() {
-        
+}
+
+// MARK: - Update Related APIs
+extension SQLiteTable {
+    
+    @discardableResult
+    public func update(_ sql: String) -> Bool {
+        return db.executeUpdate(sql)
     }
     
-    public func limit(_ count: Int) {
-        
+    @discardableResult
+    public func update(_ sql: String, where columnName: String, value: Any) -> Bool {
+        let statement = String(format: "UPDATE %@ SET %@ WHERE %@=?", tableName, sql, columnName)
+        return db.executeUpdate(statement, withArgumentsIn: [value])
+    }
+    
+    @discardableResult
+    public func update(columnName: String, columnValue: Any, whereColumnName conditionName: String, whereValue: Any) -> Bool {
+        let statement = String(format: "UPDATE %@ SET %@=? WHERE %@=?", tableName, columnName, conditionName)
+        return db.executeUpdate(statement, withArgumentsIn: [columnValue, whereValue])
     }
 }
