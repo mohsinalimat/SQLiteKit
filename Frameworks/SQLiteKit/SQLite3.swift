@@ -10,6 +10,8 @@ import SQLite3
 
 typealias Statement = OpaquePointer
 
+let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
+
 class SQLite3 {
     
     enum Result: Int32 {
@@ -46,6 +48,14 @@ class SQLite3 {
         case done = 101
     }
     
+    enum ColumnType: Int32 {
+        case Integer = 1
+        case Float = 2
+        case Text = 3
+        case Blob = 4
+        case Null = 5
+    }
+    
     static func open(filename: String, flags: SQLiteOpenFlags) {
 //        let result = sqlite3_open_v2(<#T##filename: UnsafePointer<Int8>!##UnsafePointer<Int8>!#>, <#T##ppDb: UnsafeMutablePointer<OpaquePointer?>!##UnsafeMutablePointer<OpaquePointer?>!#>, <#T##flags: Int32##Int32#>, <#T##zVfs: UnsafePointer<Int8>!##UnsafePointer<Int8>!#>)
     }
@@ -66,6 +76,8 @@ class SQLite3 {
         return Result(rawValue: result)
     }
     
+    // MARK: - Bind Begin
+    
     static func bindInt(stmt: Statement, index: Int, value: Int) -> Int32 {
         return sqlite3_bind_int(stmt, Int32(index), Int32(value))
     }
@@ -74,6 +86,18 @@ class SQLite3 {
         return Int(sqlite3_bind_int64(stmt, Int32(index), value))
     }
     
+    static func bindText(stmt: Statement, index: Int, value: String) -> Int {
+        return Int(sqlite3_bind_text(stmt, Int32(index), value, -1, SQLITE_TRANSIENT))
+    }
+    
+    static func bindBlob(stmt: Statement, index: Int, value: Data) -> Int {
+//        value.copyBytes(to: <#T##UnsafeMutableBufferPointer<DestinationType>#>)
+//        return Int(sqlite3_bind_blob(stmt, Int32(index), value.bytes, <#T##n: Int32##Int32#>, <#T##((UnsafeMutableRawPointer?) -> Void)!##((UnsafeMutableRawPointer?) -> Void)!##(UnsafeMutableRawPointer?) -> Void#>))
+        return 0
+    }
+    
+    // MARK: - Column
+    
     static func columnCount(stmt: Statement) -> Int {
         return Int(sqlite3_column_count(stmt))
     }
@@ -81,5 +105,10 @@ class SQLite3 {
     static func columnName(stmt: Statement, index: Int) -> String {
         let str = sqlite3_column_name(stmt, Int32(index))!
         return String(cString: str)
+    }
+    
+    static func columnType(stmt: Statement, index: Int) -> ColumnType {
+        let type = sqlite3_column_type(stmt, Int32(index))
+        return ColumnType(rawValue: type)!
     }
 }
