@@ -1,13 +1,13 @@
 {
   "name": "SQLiteKit",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "license": {
     "type": "MIT"
   },
   "requires_arc": true,
   "source": {
     "git": "https://github.com/alexiscn/SQLiteKit.git",
-    "tag": "0.0.8"
+    "tag": "0.0.9"
   },
   "summary": "SQLiteKit based on FMDB and Swift Codable",
   "homepage": "https://github.com/alexiscn/SQLiteKit",
@@ -18,12 +18,5 @@
     "ios": "10.0"
   },
   "swift_version": "4.0",
-  "source_files": "**/*.{swift}",
-  "ios": {
-    "dependencies": {
-      "FMDB": [
-
-      ]
-    }
-  }
+  "source_files": "**/*.{swift}"
 }

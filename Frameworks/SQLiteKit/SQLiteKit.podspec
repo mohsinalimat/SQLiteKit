@@ -14,6 +14,4 @@ Pod::Spec.new do |s|
   s.source_files    =  '**/*.{swift}'
   s.ios.deployment_target = '10.0'
   
-  s.ios.dependency 'FMDB'
-  
 end

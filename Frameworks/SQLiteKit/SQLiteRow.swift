@@ -3,7 +3,6 @@
 //  SQLiteKit
 //
 //  Created by xu.shuifeng on 2018/5/24.
-//  Copyright © 2018 me.shuifeng. All rights reserved.
 //
 
 import Foundation
@@ -24,4 +23,8 @@ public class SQLiteRow {
         }
         return nil
     }
+    
+//    public subscrip(column: SQLiteColumn) -> String? {
+//
+//    }
 }
