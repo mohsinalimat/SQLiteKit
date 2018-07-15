@@ -17,13 +17,6 @@ public class SQLiteRow {
         self.dataDict = dictionary
     }
     
-    public func decode<T: SQLiteModelProtocol>(type: T.Type) -> T? {
-        if let data = try? JSONSerialization.data(withJSONObject: dataDict, options: .prettyPrinted) {
-            return try? JSONDecoder().decode(T.self, from: data)
-        }
-        return nil
-    }
-    
 //    public subscrip(column: SQLiteColumn) -> String? {
 //
 //    }

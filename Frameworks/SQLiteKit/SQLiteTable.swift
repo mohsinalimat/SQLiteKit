@@ -7,18 +7,23 @@
 
 import Foundation
 
-public class SQLiteTable {
+public protocol SQLiteTable: Codable {
     
-    // MARK: - Find
-    
-    func find(_ query: String) {
-        
-    }
-    
-    func findOne(_ query: String) {
-        
-    }
-    
+}
+
+//
+//public class SQLiteTable {
+//
+//    // MARK: - Find
+//
+//    func find(_ query: String) {
+//
+//    }
+//
+//    func findOne(_ query: String) {
+//
+//    }
+
 //    func find(_ query: String? = nil, fields: [SQLiteColumn]? = nil, groupBy: SQLiteColumn? = nil, orderBy: SQLiteColumn? = nil, skip: Int = 0, limit: Int = 0) -> SQLiteRowList {
 //        var sql = ""
 //        if let fields = fields, fields.count > 0 {
@@ -50,16 +55,16 @@ public class SQLiteTable {
 //    }
     
     // MARK: - Update
-    
-    func update() {
-        
-    }
-}
+//
+//    func update() {
+//
+//    }
+//}
 
 
 // MARK: - Create Related APIs
-extension SQLiteTable {
-    
+//extension SQLiteTable {
+
 //    @discardableResult
 //    public func insert<T: SQLiteModelProtocol>(_ model: T) -> Bool {
 //        let columns = T.columns
@@ -79,12 +84,12 @@ extension SQLiteTable {
 //        dbLog(sql)
 //        return db.executeUpdate(sql, withArgumentsIn: model.values)
 //    }
-}
+//}
 
 
 // MARK: - Read Related APIs
-extension SQLiteTable {
-    
+//extension SQLiteTable {
+
     
 //    /// filter data by query
 //    ///
@@ -100,11 +105,11 @@ extension SQLiteTable {
 //        return db.executeQuery(sql)
 //    }
     
-}
+//}
 
 // MARK: - Update Related APIs
-extension SQLiteTable {
-    
+//extension SQLiteTable {
+
 //    @discardableResult
 //    public func update(_ sql: String) -> Bool {
 //        return db.executeUpdate(sql)
@@ -121,4 +126,4 @@ extension SQLiteTable {
 //        let statement = String(format: "UPDATE %@ SET %@=? WHERE %@=?", tableName, columnName, conditionName)
 //        return db.executeUpdate(statement, withArgumentsIn: [columnValue, whereValue])
 //    }
-}
+//}
