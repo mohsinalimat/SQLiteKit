@@ -60,18 +60,38 @@ public class SQLiteConnection {
         return []
     }
     
-    public func insert(_ object: SQLiteTable?) -> Int {
-        if object == nil {
+    public func insert(_ obj: SQLiteTable?) -> Int {
+        return insert(obj, extra: "")
+    }
+    
+    public func insertOrReplace(_ obj: SQLiteTable?) -> Int {
+        return insert(obj, extra: "OR REPLACE")
+    }
+    
+    @discardableResult
+    public func insert(_ obj: SQLiteTable?, extra: String) -> Int {
+        guard let object = obj else {
             return 0
         }
         return 0
     }
     
-    public func insertOrReplace(_ object: SQLiteTable?) -> Int {
-        if object == nil {
-            return 0
-        }
+    @discardableResult
+    public func update(_ obj: SQLiteTable) -> Int {
         return 0
+    }
+    
+    @discardableResult
+    public func delete(_ obj: SQLiteTable) -> Int {
+        return 0
+    }
+    
+    public func deleteAll<T: SQLiteTable>(_ type: T.Type)  {
+        
+    }
+    
+    public func close() {
+        
     }
 }
 

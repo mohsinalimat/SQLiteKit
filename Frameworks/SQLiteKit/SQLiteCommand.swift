@@ -63,6 +63,7 @@ public class SQLiteCommand {
         if columnType == .Null {
             return nil
         }
+        
         return nil
     }
     

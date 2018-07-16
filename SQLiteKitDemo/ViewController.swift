@@ -31,9 +31,9 @@ struct User: SQLiteTable {
     
     var birthday: Date
     
-    func attributes() -> [ColumnAttribute] {
+    static func sqliteAttributes() -> [SQLiteAttribute] {
         return [
-            ColumnAttribute(name: "name", info: .autoInc)
+            SQLiteAttribute(name: "name", attribute: .autoInc)
         ]
     }
 }

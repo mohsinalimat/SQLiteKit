@@ -9,7 +9,7 @@ import Foundation
 
 public protocol SQLiteTable: Codable {
     
-    func attributes() -> [ColumnAttribute]
+    static func sqliteAttributes() -> [SQLiteAttribute]
     
 }
 
