@@ -8,6 +8,15 @@
 import Foundation
 import SQLite3
 
+public struct ColumnAttribute {
+    public let name: String
+    public let info: ColumnInfo
+    public init(name: String, info: ColumnInfo) {
+        self.name = name
+        self.info = info
+    }
+}
+
 public struct ColumnInfo: OptionSet {
     
     public let rawValue: Int

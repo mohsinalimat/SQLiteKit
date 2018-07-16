@@ -58,11 +58,13 @@ class SQLite3 {
         case Null = 5
     }
     
+    @discardableResult
     static func open(filename: String, db: inout DatabaseHandle?, flags: SQLiteOpenFlags) -> Result? {
         let result = sqlite3_open_v2(filename, &db, flags.rawValue, nil)
         return Result(rawValue: result)
     }
     
+    @discardableResult
     static func close(_ handle: DatabaseHandle) -> Result? {
         let result = sqlite3_close_v2(handle)
         return Result(rawValue: result)
@@ -78,11 +80,13 @@ class SQLite3 {
         return stmt
     }
     
+    @discardableResult
     static func step(_ stmt: Statement) -> Result? {
         let result = sqlite3_step(stmt)
         return Result(rawValue: result)
     }
     
+    @discardableResult
     static func reset(_ stmt: Statement) -> Result? {
         let result = sqlite3_reset(stmt)
         return Result(rawValue: result)

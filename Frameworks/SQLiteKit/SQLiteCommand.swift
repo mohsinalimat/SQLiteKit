@@ -36,7 +36,7 @@ public class SQLiteCommand {
         _bindings.append(binding)
     }
     
-    func bind(value: Any) {
+    func bind(_ value: Any) {
         
     }
     

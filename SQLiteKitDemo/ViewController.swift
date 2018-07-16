@@ -22,3 +22,18 @@ class ViewController: UIViewController {
     }
 }
 
+
+struct User: SQLiteTable {
+    
+    var name: String
+    
+    var age: Int
+    
+    var birthday: Date
+    
+    func attributes() -> [ColumnAttribute] {
+        return [
+            ColumnAttribute(name: "name", info: .autoInc)
+        ]
+    }
+}
