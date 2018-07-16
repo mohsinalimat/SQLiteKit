@@ -7,26 +7,23 @@
 
 import Foundation
 
-struct Binding {
-    
-    public let name: String
-    
-    public let value: Any?
-    
-    public var index: Int = 0
-    
-    init(name: String, value: Any?) {
-        self.name = name
-        self.value = value
-        self.index = 0
-    }
-}
-
 public class SQLiteCommand {
+    
+    struct Binding {
+        public let name: String
+        public let value: Any?
+        public var index: Int = 0
+        
+        init(name: String, value: Any?) {
+            self.name = name
+            self.value = value
+            self.index = 0
+        }
+    }
     
     fileprivate let conn: SQLiteConnection
     
-    fileprivate var bindings: [Binding] = []
+    fileprivate var _bindings: [Binding] = []
     
     public var commandText: String = ""
     
@@ -36,18 +33,18 @@ public class SQLiteCommand {
     
     func bind(_ name: String, value: Any) {
         let binding = Binding(name: name, value: value)
-        bindings.append(binding)
+        _bindings.append(binding)
     }
     
     func bind(value: Any) {
-        //bind(<#T##name: String##String#>, value: <#T##Any#>)
+        
     }
     
     func bindAll(_ stmt: Statement) {
         var index = 1
-        for var bind in bindings {
+        for var bind in _bindings {
             if let value = bind.value {
-                
+                print(value)
             }
             bind.index = SQLite3.bindParameterIndex(stmt, name: bind.name)
         }
@@ -55,7 +52,7 @@ public class SQLiteCommand {
     
     static func bindParameter(_ stmt: Statement, index: Int, value: Any?) {
         if let value = value {
-            
+            print(value)
         } else {
             SQLite3.bindNull(stmt, index: index)
         }
@@ -69,12 +66,22 @@ public class SQLiteCommand {
         return nil
     }
     
-//    func prepare() -> Statement {
-//        SQLite3.prepare(dbHandle: conn, SQL: <#T##String#>)
-//    }
+    func prepare() -> Statement? {
+        let stmt = SQLite3.prepare(conn.handle, SQL: commandText)
+        bindAll(stmt!)
+        return stmt
+    }
     
 //    func executeScalar<T>() -> T {
 //
 //    }
     
+    func executeNonQuery() -> Int {
+        guard let stmt = prepare() else {
+            return -1
+        }
+        let r = SQLite3.step(stmt)
+        print(r)
+        return 0
+    }
 }

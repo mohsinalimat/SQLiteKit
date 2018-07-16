@@ -28,14 +28,19 @@ public class SQLiteConnection {
     
     fileprivate let openFlags: SQLiteOpenFlags
     
-    public init(databasePath: String) {
-        self.dbPath = databasePath
-        self.openFlags = [.readWrite, .create]
+    let handle: DatabaseHandle
+    
+    public convenience init(databasePath: String) {
+        self.init(databasePath: databasePath, openFlags: [.readWrite, .create])
     }
     
     public init(databasePath: String, openFlags: SQLiteOpenFlags) {
         self.dbPath = databasePath
         self.openFlags = openFlags
+        
+        var dbHandle: DatabaseHandle?
+        let _ = SQLite3.open(filename: dbPath, db: &dbHandle, flags: .create)
+        handle = dbHandle!
     }
 
     public func createTable<T: SQLiteTable>(_ type: T.Type, createFlag: CreateFlags = .none) {

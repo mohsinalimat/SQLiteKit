@@ -58,8 +58,9 @@ class SQLite3 {
         case Null = 5
     }
     
-    static func open(filename: String, flags: SQLiteOpenFlags) {
-//        let result = sqlite3_open_v2(<#T##filename: UnsafePointer<Int8>!##UnsafePointer<Int8>!#>, <#T##ppDb: UnsafeMutablePointer<OpaquePointer?>!##UnsafeMutablePointer<OpaquePointer?>!#>, <#T##flags: Int32##Int32#>, <#T##zVfs: UnsafePointer<Int8>!##UnsafePointer<Int8>!#>)
+    static func open(filename: String, db: inout DatabaseHandle?, flags: SQLiteOpenFlags) -> Result? {
+        let result = sqlite3_open_v2(filename, &db, flags.rawValue, nil)
+        return Result(rawValue: result)
     }
     
     static func close(_ handle: DatabaseHandle) -> Result? {
@@ -67,9 +68,13 @@ class SQLite3 {
         return Result(rawValue: result)
     }
     
-    static func prepare(dbHandle: OpaquePointer, SQL: String) -> Statement? {
+    static func changes(_ db: DatabaseHandle) -> Int {
+        return Int(sqlite3_changes(db))
+    }
+    
+    static func prepare(_ db: OpaquePointer, SQL: String) -> Statement? {
         var stmt: Statement? = nil
-        let result = sqlite3_prepare_v2(dbHandle, SQL, -1, &stmt, nil)
+        let _ = sqlite3_prepare_v2(db, SQL, -1, &stmt, nil)
         return stmt
     }
     
@@ -81,6 +86,14 @@ class SQLite3 {
     static func reset(_ stmt: Statement) -> Result? {
         let result = sqlite3_reset(stmt)
         return Result(rawValue: result)
+    }
+    
+    static func lastInsertRowid(_ db: DatabaseHandle) -> Int64 {
+        return sqlite3_last_insert_rowid(db)
+    }
+    
+    static func getErrorMessage(_ db: DatabaseHandle) -> String {
+        return String(cString: sqlite3_errmsg(db))
     }
     
     // MARK: - Bind Begin
