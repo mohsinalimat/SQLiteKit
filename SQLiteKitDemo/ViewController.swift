@@ -11,9 +11,17 @@ import SQLiteKit
 
 class ViewController: UIViewController {
 
+    var db: SQLiteConnection?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+        let dbPath = NSHomeDirectory().appending("/Documents/db.sqlite")
+        
+        db = SQLiteConnection(databasePath: dbPath)
+        
+        db?.createTable(User.self)
     }
 
     override func didReceiveMemoryWarning() {

@@ -25,8 +25,9 @@ public class SQLiteConnection {
     }
     
     fileprivate let dbPath: String
-    
+    fileprivate var un_fair_lock = os_unfair_lock()
     fileprivate let openFlags: SQLiteOpenFlags
+    fileprivate var _mappings: [String: TableMapping] = [:]
     
     let handle: DatabaseHandle
     
@@ -49,7 +50,8 @@ public class SQLiteConnection {
 
     public func createTable<T: SQLiteTable>(_ type: T.Type, createFlag: CreateFlags = .none) {
         let mapping = Mirror(reflecting: T.self)
-        
+        let name = String(describing: type)
+        print(name)
     }
     
     public func execute(_ query: String, parameters: [Any]) {
@@ -93,6 +95,22 @@ public class SQLiteConnection {
     public func close() {
         
     }
+    
+    fileprivate func getMapping(_ type: SQLiteTable.Type) {
+        lock()
+        if let map = _mappings[""] {
+            
+        }
+        unlock()
+    }
+    
+    fileprivate func lock() {
+        os_unfair_lock_lock(&un_fair_lock)
+    }
+    
+    fileprivate func unlock() {
+        os_unfair_lock_unlock(&un_fair_lock)
+    }
 }
 
 extension SQLiteConnection {
@@ -111,4 +129,6 @@ extension SQLiteConnection {
     }
     
 }
+
+
 
