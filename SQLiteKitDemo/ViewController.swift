@@ -31,7 +31,7 @@ class ViewController: UIViewController {
 }
 
 
-struct User: SQLiteTable {
+class User: SQLiteTable {
     
     var name: String
     
@@ -41,7 +41,12 @@ struct User: SQLiteTable {
     
     static func sqliteAttributes() -> [SQLiteAttribute] {
         return [
-            SQLiteAttribute(name: "name", attribute: .autoInc)
         ]
+    }
+    
+    required init() {
+        name = ""
+        age = 0
+        birthday = Date()
     }
 }

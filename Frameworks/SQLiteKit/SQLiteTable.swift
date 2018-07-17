@@ -7,7 +7,9 @@
 
 import Foundation
 
-public protocol SQLiteTable: Codable {
+public protocol SQLiteTable: class {
+    
+    init()
     
     static func sqliteAttributes() -> [SQLiteAttribute]
     

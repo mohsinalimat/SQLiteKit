@@ -19,6 +19,7 @@ public struct TableMapping {
     
     public init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
         let attributes = type.sqliteAttributes()
+        
         if let nameAttribute = attributes.first(where: { $0.attribute == .tableName }) {
             tableName = nameAttribute.name
         } else {
@@ -27,7 +28,7 @@ public struct TableMapping {
         self.createFlags = createFlags
         
         var cols: [Column] = []
-        let mirror = Mirror(reflecting: type)
+        let mirror = Mirror(reflecting: type.init())
         for child in mirror.children {
             let col = Column(propertyInfo: child, attributes: attributes)
             cols.append(col)
@@ -51,10 +52,12 @@ public struct TableMapping {
         public let columnType: Any.Type
         
         init(propertyInfo: Mirror.Child, attributes: [SQLiteAttribute]) {
-            name = ""
-            isNullable = false
-            isPK = false
-            isAutoInc = false
+            let columnName = propertyInfo.label!
+            name = columnName
+            isNullable = true
+            let columnAttr = attributes.filter { $0.name == columnName }
+            isPK = columnAttr.first(where: { $0.attribute == Attribute.isPK }) != nil
+            isAutoInc = columnAttr.first(where: { $0.attribute == Attribute.autoInc }) != nil
             columnType = type(of: propertyInfo.value)
         }
         
@@ -62,21 +65,36 @@ public struct TableMapping {
     
     class ORM {
         
+        class func sqlDeclaration(of column: Column) -> String {
+            var decl = "'\(column.name)' \(sqlType(of: column))"
+            if column.isPK {
+                decl += "PRIMARY KEY "
+            }
+            if column.isAutoInc {
+                decl += "AUTOINCREMENT "
+            }
+            if !column.isNullable {
+                decl += "NOT NULL"
+            }
+            return decl
+        }
+        
         class func sqlType(of column: Column) -> String {
             
             let mappings: [String: [Any.Type]] = [
-                "integer": [
+                "INTEGER": [
                     Int.self, Int?.self,
                     Bool.self, Bool?.self
                 ],
-                "float": [
-                    Float.self, Float?.self
+                "REAL": [
+                    Float.self, Float?.self,
+                    Date.self, Date?.self
                 ],
-                "text": [
+                "TEXT": [
                     String.self, String?.self,
                     URL.self, URL?.self
                 ],
-                "blob": [
+                "BLOB": [
                     Data.self, Data?.self,
                     [UInt8].self, [UInt8]?.self
                 ]
@@ -86,7 +104,7 @@ public struct TableMapping {
             
             for map in mappings {
                 if map.value.contains(where: { type == $0 }) {
-                    break
+                    return map.key
                 }
             }
             

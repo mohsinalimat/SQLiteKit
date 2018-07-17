@@ -59,7 +59,7 @@ class SQLite3 {
     }
     
     @discardableResult
-    static func open(filename: String, db: inout DatabaseHandle?, flags: SQLiteOpenFlags) -> Result? {
+    static func open(filename: String, db: inout DatabaseHandle?, flags: SQLiteConnection.OpenFlags) -> Result? {
         let result = sqlite3_open_v2(filename, &db, flags.rawValue , nil)
         return Result(rawValue: result)
     }

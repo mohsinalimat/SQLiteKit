@@ -20,13 +20,34 @@ public class SQLiteConnection {
         case fullTextSearch4 = 0x200
     }
     
+    public struct OpenFlags: OptionSet {
+        
+        public let rawValue: Int32
+        
+        public init(rawValue: Int32) {
+            self.rawValue = rawValue
+        }
+        
+        public static let readOnly = OpenFlags(rawValue: 1)
+        public static let readWrite = OpenFlags(rawValue: 2)
+        public static let create = OpenFlags(rawValue: 4)
+        public static let noMutex = OpenFlags(rawValue: 0x8000)
+        public static let fullMutex = OpenFlags(rawValue: 0x10000)
+        public static let sharedCache = OpenFlags(rawValue: 0x20000)
+        public static let privateCache = OpenFlags(rawValue: 0x40000)
+        public static let protectionComplete = OpenFlags(rawValue: 0x00100000)
+        public static let protectionCompleteUnlessOpen = OpenFlags(rawValue: 0x00200000)
+        public static let protectionCompleteUntilFirstUserAuthentication = OpenFlags(rawValue: 0x00300000)
+        public static let protectionNone = OpenFlags(rawValue: 0x00400000)
+    }
+    
     public enum CreateTableResult {
         case created, migrated
     }
     
     fileprivate let dbPath: String
     fileprivate var un_fair_lock = os_unfair_lock()
-    fileprivate let openFlags: SQLiteOpenFlags
+    fileprivate let openFlags: OpenFlags
     fileprivate var _mappings: [String: TableMapping] = [:]
     
     let handle: DatabaseHandle
@@ -35,7 +56,7 @@ public class SQLiteConnection {
         self.init(databasePath: databasePath, openFlags: [.readWrite, .create])
     }
     
-    public init(databasePath: String, openFlags: SQLiteOpenFlags) {
+    public init(databasePath: String, openFlags: OpenFlags) {
         self.dbPath = databasePath
         self.openFlags = openFlags
         
@@ -68,16 +89,18 @@ public class SQLiteConnection {
                 using = "USING FTS4"
             }
             var sql = "CREATE \(virtual) TABLE IF NOT EXISTS \(map.tableName) \(using)("
+            let declarationList = map.columns.map { return TableMapping.ORM.sqlDeclaration(of: $0) }
+            let declaration = declarationList.joined(separator: ",")
+            sql += declaration
+            sql += ")"
+            print(sql)
             if map.withoutRowId {
                 sql += " without rowid"
             }
-            
+            execute(sql)
         } else {
-            
+            // migration
         }
-        
-        
-        
     }
     
     public func getExistingColumns(tableName: String) -> [String] {
@@ -85,8 +108,11 @@ public class SQLiteConnection {
         return []
     }
     
-    public func execute(_ query: String, parameters: [Any]) {
-        
+    @discardableResult
+    public func execute(_ query: String, parameters: [Any] = []) -> Int {
+        let cmd = createCommand(query, parameters: parameters)
+        let r = cmd.executeNonQuery()
+        return r
     }
     
     public func query<T: SQLiteTable>(_ query: String, parameters: [Any]) -> [T] {

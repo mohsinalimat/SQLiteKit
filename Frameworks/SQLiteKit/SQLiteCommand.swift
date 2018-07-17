@@ -77,12 +77,24 @@ public class SQLiteCommand {
 //
 //    }
     
+    @discardableResult
     func executeNonQuery() -> Int {
         guard let stmt = prepare() else {
-            return -1
+            return 0
         }
-        let r = SQLite3.step(stmt)
-        print(r)
+        guard let r = SQLite3.step(stmt) else {
+            return 0
+        }
+        
+        if r == SQLite3.Result.done {
+            let rowsAffected = SQLite3.changes(conn.handle)
+            return rowsAffected
+        } else if r == SQLite3.Result.error {
+            let msg = SQLite3.getErrorMessage(conn.handle)
+            let error = SQLiteError.excuteError(Int(r.rawValue), msg)
+            print(error)
+        }
+    
         return 0
     }
 }
