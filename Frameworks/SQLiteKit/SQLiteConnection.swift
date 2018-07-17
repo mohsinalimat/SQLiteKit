@@ -10,14 +10,14 @@ import SQLite3
 
 public class SQLiteConnection {
 
-    public enum CreateFlags {
-        case none
-        case implicitPK
-        case implicitIndex
-        case allImplicit
-        case autoIncPK
-        case fullTextSearch3
-        case FullTextSearch4
+    public enum CreateFlags: Int {
+        case none = 0x000
+        case implicitPK = 0x001
+        case implicitIndex = 0x002
+        case allImplicit = 0x003
+        case autoIncPK = 0x004
+        case fullTextSearch3 = 0x100
+        case fullTextSearch4 = 0x200
     }
     
     public enum CreateTableResult {
@@ -40,7 +40,7 @@ public class SQLiteConnection {
         self.openFlags = openFlags
         
         var dbHandle: DatabaseHandle?
-        let _ = SQLite3.open(filename: dbPath, db: &dbHandle, flags: .create)
+        let _ = SQLite3.open(filename: dbPath, db: &dbHandle, flags: openFlags)
         handle = dbHandle!
     }
     
@@ -48,10 +48,41 @@ public class SQLiteConnection {
         SQLite3.close(handle)
     }
 
-    public func createTable<T: SQLiteTable>(_ type: T.Type, createFlag: CreateFlags = .none) {
-        let mapping = Mirror(reflecting: T.self)
-        let name = String(describing: type)
-        print(name)
+    public func createTable<T: SQLiteTable>(_ type: T.Type, createFlags: CreateFlags = .none) {
+        let map = getMapping(of: type, createFlags: createFlags)
+        if map.columns.count == 0 {
+            return
+        }
+        
+        let existingCols = getExistingColumns(tableName: map.tableName)
+        if existingCols.count == 0 {
+            let fts3: Bool = (createFlags.rawValue & CreateFlags.fullTextSearch3.rawValue) != 0
+            let fts4: Bool = (createFlags.rawValue & CreateFlags.fullTextSearch4.rawValue) != 0
+            let fts = fts3 || fts4
+            let virtual = fts ? "VIRTUAL ": ""
+            
+            var using = ""
+            if fts3 {
+                using = "USING FTS3"
+            } else if fts4 {
+                using = "USING FTS4"
+            }
+            var sql = "CREATE \(virtual) TABLE IF NOT EXISTS \(map.tableName) \(using)("
+            if map.withoutRowId {
+                sql += " without rowid"
+            }
+            
+        } else {
+            
+        }
+        
+        
+        
+    }
+    
+    public func getExistingColumns(tableName: String) -> [String] {
+        //let query = String(format: "pragma table_info(%@)", tableName)
+        return []
     }
     
     public func execute(_ query: String, parameters: [Any]) {
@@ -96,12 +127,23 @@ public class SQLiteConnection {
         
     }
     
-    fileprivate func getMapping(_ type: SQLiteTable.Type) {
+    fileprivate func getMapping(of type: SQLiteTable.Type, createFlags: CreateFlags = .none) -> TableMapping {
+        let key = String(describing: type)
+        var map: TableMapping
         lock()
-        if let map = _mappings[""] {
-            
+        if let oldMap = _mappings[key] {
+            if createFlags != .none && createFlags != oldMap.createFlags {
+                map = TableMapping(type: type, createFlags: createFlags)
+                _mappings[key] = map
+            } else {
+                map = oldMap
+            }
+        } else {
+            map = TableMapping(type: type)
+            _mappings[key] = map
         }
         unlock()
+        return map
     }
     
     fileprivate func lock() {

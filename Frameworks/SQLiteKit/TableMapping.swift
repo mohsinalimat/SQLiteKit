@@ -11,17 +11,28 @@ public struct TableMapping {
     
     public let tableName: String
     
+    public let createFlags: SQLiteConnection.CreateFlags
+    
+    public let columns: [Column]
+    
     public var withoutRowId: Bool = false
     
-    init(type: SQLiteTable.Type) {
-        
-        
+    public init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
         let attributes = type.sqliteAttributes()
         if let nameAttribute = attributes.first(where: { $0.attribute == .tableName }) {
             tableName = nameAttribute.name
         } else {
             tableName = String(describing: type.self)
         }
+        self.createFlags = createFlags
+        
+        var cols: [Column] = []
+        let mirror = Mirror(reflecting: type)
+        for child in mirror.children {
+            let col = Column(propertyInfo: child, attributes: attributes)
+            cols.append(col)
+        }
+        columns = cols
         
         withoutRowId = false
     }
