@@ -97,4 +97,45 @@ public class SQLiteCommand {
     
         return 0
     }
+    
+    func executeQuery<T: SQLiteTable>() -> [T] {
+        let map = conn.getMapping(of: T.self)
+        return executeDeferredQuery(map)
+    }
+    
+    func executeDeferredQuery<T: SQLiteTable>(_ map: TableMapping) -> [T] {
+        
+        guard let stmt = prepare() else {
+            return []
+        }
+        
+        let columnCount = SQLite3.columnCount(stmt)
+        var cols: [TableMapping.Column] = []
+        for i in 0..<columnCount {
+            let name = SQLite3.columnName(stmt, index: i)
+            if let column = map.findColumn(with: name) {
+                cols.append(column)
+            }
+        }
+        
+        var result: [T] = []
+        while SQLite3.step(stmt) == SQLite3.Result.row {
+            // currently use JSONSerialization and JSONDecoder to ORM mapping
+            var dict: [String: Any?] = [:]
+            // read cols
+            for i in 0..<columnCount {
+                let colType = SQLite3.columnType(stmt, index: i)
+                let value = readColumn(stmt, index: i, columnType: colType)
+                dict[cols[i].name] = value
+            }
+            do {
+                let data = try JSONSerialization.data(withJSONObject: dict, options: [])
+                let obj = try JSONDecoder().decode(T.self, from: data)
+                result.append(obj)
+            } catch {
+                print(error)
+            }
+        }
+        return result
+    }
 }

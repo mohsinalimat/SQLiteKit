@@ -22,6 +22,13 @@ class ViewController: UIViewController {
         db = SQLiteConnection(databasePath: dbPath)
         
         db?.createTable(User.self)
+        
+        let user = User()
+        user.name = "Tom"
+        user.age = 20
+        user.birthday = Date()
+        
+        db?.insert(user)
     }
 
     override func didReceiveMemoryWarning() {

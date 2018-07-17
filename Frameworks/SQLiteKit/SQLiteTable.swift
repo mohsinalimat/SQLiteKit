@@ -7,16 +7,25 @@
 
 import Foundation
 
-public protocol SQLiteTable: class {
+/// Type to reflect to a database table
+public protocol SQLiteTable: class, Codable {
     
     init()
-    
+
+    /// specifiy column attributes of a table, eg: isPK
+    ///
+    /// - Returns: column attributes
     static func sqliteAttributes() -> [SQLiteAttribute]
     
 }
 
 extension SQLiteTable {
 
+    /// return mapping type of SQLiteTable
+    internal var mapType: SQLiteTable.Type {
+        let mirror = Mirror(reflecting: self)
+        return mirror.subjectType as! SQLiteTable.Type
+    }
 }
 
 

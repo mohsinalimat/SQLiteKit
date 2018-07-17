@@ -166,4 +166,18 @@ class SQLite3 {
     static func columnDouble(_ stmt: Statement, index: Int) -> Double {
         return Double(sqlite3_column_double(stmt, Int32(index)))
     }
+    
+    static func columnText(_ stmt: Statement, index: Int) -> String {
+        let str = sqlite3_column_text(stmt, Int32(index))!
+        return String(cString: str)
+    }
+    
+    static func columnBlob(_ stmt: Statement, index: Int) -> UnsafeRawPointer? {
+        let blob = sqlite3_column_blob(stmt, Int32(index))
+        return blob
+    }
+    
+    static func libVersionNumber() -> Int {
+        return Int(sqlite3_libversion_number())
+    }
 }

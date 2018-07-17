@@ -15,6 +15,8 @@ public struct TableMapping {
     
     public let columns: [Column]
     
+    public var pk: Column?
+    
     public var withoutRowId: Bool = false
     
     public init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
@@ -35,13 +37,24 @@ public struct TableMapping {
         }
         columns = cols
         
+        for col in cols {
+            if col.isPK {
+                pk = col
+            }
+        }
+        
         withoutRowId = false
     }
     
+    func findColumn(with name: String) -> Column? {
+        return columns.first(where: { $0.name == name })
+    }
     
     public class Column {
         
         public let name: String
+        
+        public let value: Any
         
         public let isNullable: Bool
         
@@ -54,6 +67,7 @@ public struct TableMapping {
         init(propertyInfo: Mirror.Child, attributes: [SQLiteAttribute]) {
             let columnName = propertyInfo.label!
             name = columnName
+            value = propertyInfo.value
             isNullable = true
             let columnAttr = attributes.filter { $0.name == columnName }
             isPK = columnAttr.first(where: { $0.attribute == Attribute.isPK }) != nil
