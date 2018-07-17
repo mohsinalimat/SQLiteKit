@@ -1,8 +1,13 @@
+
+# SQLiteKit
+
+a portal of [SQLite-net](https://github.com/praeclarum/sqlite-net/)
+
+
 ## Features
 
 - [x] ORM 
-- [] 
-- [] Dynamic add column
+- [x] Auto table migration
 
 
 ## Requirements
@@ -28,8 +33,8 @@ pod 'SQLiteKit'
 ```swift
 
 func createDatabase() {
-    let path = NSHomeDirectory().appending("db.sqlite")
-    let db = SQLiteKit(path: path)
+    let dbPath = NSHomeDirectory().appending("db.sqlite")
+    let db = SQLiteConnection(databasePath: dbPath)
 }
 ```
 
@@ -37,35 +42,24 @@ func createDatabase() {
 
  ```swift
  
- class UserModel: SQLiteModelProtocol {
-     let name: String
-     let age: Int
-     let avatarData: Data
+ class User: SQLiteTable {
+    var userID: Int
+    var name: String
+    var age: Int
+    var avatarData: Data?
      
-     init(name: String, age: Int, avatar: Data) {
-         self.name = name
-         self.age = age
-         self.avatarData = avatarData
-     }
+    required init() {
+        self.name = ""
+        self.age = 0
+        self.avatarData = nil
+    }
      
-     // MARK: - SQLiteModelProtocol
+    // MARK: - SQLiteTable
      
-     static var tableName: String {
-         return "Users"
-     }
-     
-     var values: [Any] {
-         return [name, age, avatarData]
-     }
-     
-     static var columns: [SQLiteColumn] {
-         return [
-             SQLiteColumn(name: "name", dataType: .string),
-             SQLiteColumn(name: "age", dataType: .int),
-             SQLiteColumn(name: "avatarData", dataType: .data)
-         ]
-     }
- }
+    static func sqliteAttributes: [SQLiteAttribute] {
+         return []
+    }
+}
  ```
  
  #### 3. Insert data
