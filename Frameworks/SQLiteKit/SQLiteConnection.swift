@@ -119,14 +119,14 @@ public class SQLiteConnection {
             } else if fts4 {
                 using = "USING FTS4"
             }
-            var sql = "CREATE \(virtual) TABLE IF NOT EXISTS \(map.tableName) \(using)("
+            var sql = "CREATE \(virtual)TABLE IF NOT EXISTS \(map.tableName) \(using)("
             let declarationList = map.columns.map { return TableMapping.ORM.sqlDeclaration(of: $0) }
             let declaration = declarationList.joined(separator: ",")
             sql += declaration
             sql += ")"
             print(sql)
             if map.withoutRowId {
-                sql += " without rowid"
+                sql += " WITHOUT ROWID"
             }
             execute(sql)
             result = .created
@@ -146,16 +146,10 @@ public class SQLiteConnection {
     @discardableResult
     public func createIndex(_ indexName: String, tableName: String, columnNames: [String], unique: Bool = false) -> Int {
         let columns = columnNames.joined(separator: ",")
-        let u = unique ? "unique": ""
+        let u = unique ? "UNIQUE": ""
         let sql = String(format: "CREATE %@ INDEX IF NOT EXISTS %@ ON %@(%@)", columns, indexName, u, tableName)
         return execute(sql)
     }
-    
-    public func getExistingColumns(tableName: String) -> [String] {
-        //let query = String(format: "pragma table_info(%@)", tableName)
-        return []
-    }
-    
     
     /// Creates a SQLiteCommand given the command text (SQL) with arguments. Place a '?'
     /// in the command text for each of the arguments and then executes that command.
@@ -175,10 +169,9 @@ public class SQLiteConnection {
     
     // MARK: - Query
     
-    public func query<T: SQLiteTable>(_ query: String, parameters: [Any]) -> [T] {
+    public func query<T: SQLiteTable>(_ query: String, parameters: [Any] = []) -> [T] {
         let cmd = createCommand(query, parameters: parameters)
-        
-        return []
+        return cmd.executeQuery()
     }
     
     // MARK: - Transcation
@@ -257,7 +250,7 @@ public class SQLiteConnection {
         guard let pk = map.pk else {
             return 0
         }
-        let sql = "delete from \(map.tableName) where \(pk.name) = ?"
+        let sql = "DELETE FROM \(map.tableName) WHERE \(pk.name) = ?"
         return execute(sql, parameters: [pk.value])
     }
     
@@ -292,19 +285,24 @@ extension SQLiteConnection {
         return map
     }
     
-    fileprivate func migrateTable(_ map: TableMapping, existingCols: [String]) {
+    fileprivate func migrateTable(_ map: TableMapping, existingCols: [ColumnInfo]) {
         var newCols: [TableMapping.Column] = []
         for column in map.columns {
-            if existingCols.contains(column.name) {
+            if let _ = existingCols.first(where: { $0.name == column.name }) {
                 continue
             }
             newCols.append(column)
         }
         for p in newCols {
-            let sql = "alter table \(map.tableName) add column \(TableMapping.ORM.sqlDeclaration(of: p))"
+            let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(TableMapping.ORM.sqlDeclaration(of: p))"
             execute(sql)
         }
         print(newCols)
+    }
+    
+    fileprivate func getExistingColumns(tableName: String) -> [ColumnInfo] {
+        let sql = String(format: "pragma table_info(%@)", tableName)
+        return query(sql)
     }
     
     fileprivate func createCommand(_ cmdText: String, parameters: [Any]) -> SQLiteCommand {

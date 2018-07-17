@@ -59,9 +59,19 @@ public class SQLiteCommand {
         
     }
     
-    func readColumn(_ stmt: Statement, index: Int, columnType: SQLite3.ColumnType) -> Any? {
+    func readColumn(_ stmt: Statement, index: Int, columnType: SQLite3.ColumnType, type: Any.Type) -> Any? {
         if columnType == .Null {
             return nil
+        }
+        // TODO
+        if type is String.Type {
+            return SQLite3.columnText(stmt, index: index)
+        } else if type is Int.Type {
+            return SQLite3.columnInt(stmt, index: index)
+        } else if type is Bool.Type {
+            return SQLite3.columnInt(stmt, index: index) == 1
+        } else if type is Float.Type || type is Double.Type {
+            return SQLite3.columnDouble(stmt, index: index)
         }
         
         return nil
@@ -110,12 +120,11 @@ public class SQLiteCommand {
         }
         
         let columnCount = SQLite3.columnCount(stmt)
-        var cols: [TableMapping.Column] = []
+        var cols: [TableMapping.Column?] = []
         for i in 0..<columnCount {
             let name = SQLite3.columnName(stmt, index: i)
-            if let column = map.findColumn(with: name) {
-                cols.append(column)
-            }
+            let column = map.findColumn(with: name)
+            cols.append(column)
         }
         
         var result: [T] = []
@@ -124,9 +133,11 @@ public class SQLiteCommand {
             var dict: [String: Any?] = [:]
             // read cols
             for i in 0..<columnCount {
-                let colType = SQLite3.columnType(stmt, index: i)
-                let value = readColumn(stmt, index: i, columnType: colType)
-                dict[cols[i].name] = value
+                if let col = cols[i] {
+                    let colType = SQLite3.columnType(stmt, index: i)
+                    let value = readColumn(stmt, index: i, columnType: colType, type: col.columnType)
+                    dict[col.name] = value
+                }
             }
             do {
                 let data = try JSONSerialization.data(withJSONObject: dict, options: [])
