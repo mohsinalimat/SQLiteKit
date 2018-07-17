@@ -13,6 +13,7 @@
 		A35E6A1E20C1123E0064490E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A35E6A1C20C1123E0064490E /* Main.storyboard */; };
 		A35E6A2020C1123F0064490E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A35E6A1F20C1123F0064490E /* Assets.xcassets */; };
 		A35E6A2320C1123F0064490E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A35E6A2120C1123F0064490E /* LaunchScreen.storyboard */; };
+		A3A669D820FD761800077BD5 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = A3A669D720FD761800077BD5 /* libsqlite3.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		A35E6A1F20C1123F0064490E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A35E6A2220C1123F0064490E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A35E6A2420C1123F0064490E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A3A669D720FD761800077BD5 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		CA6418D7A7A9EF2168A1EC3F /* Pods_SQLiteKitDemo.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SQLiteKitDemo.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5BCDB565BBA4A853C2D8BAF /* Pods-SQLiteKitDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SQLiteKitDemo.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SQLiteKitDemo/Pods-SQLiteKitDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		EE27B8AD06403B57D41A5E1B /* Pods-SQLiteKitDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SQLiteKitDemo.release.xcconfig"; path = "Pods/Target Support Files/Pods-SQLiteKitDemo/Pods-SQLiteKitDemo.release.xcconfig"; sourceTree = "<group>"; };
@@ -33,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A3A669D820FD761800077BD5 /* libsqlite3.tbd in Frameworks */,
 				8382EE0BEFF71EAEF1ABF8B7 /* Pods_SQLiteKitDemo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -43,6 +46,7 @@
 		7D3A124DF98D5AF69BC877E5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A3A669D720FD761800077BD5 /* libsqlite3.tbd */,
 				CA6418D7A7A9EF2168A1EC3F /* Pods_SQLiteKitDemo.framework */,
 			);
 			name = Frameworks;
@@ -349,7 +353,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LX863G777H;
 				INFOPLIST_FILE = SQLiteKitDemo/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.shuifeng.SQLiteKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
@@ -365,7 +372,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = LX863G777H;
 				INFOPLIST_FILE = SQLiteKitDemo/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = me.shuifeng.SQLiteKitDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;

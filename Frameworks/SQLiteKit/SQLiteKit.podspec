@@ -13,5 +13,6 @@ Pod::Spec.new do |s|
   s.swift_version   = '4.0'
   s.source_files    =  '**/*.{swift}'
   s.ios.deployment_target = '10.0'
+  s.library = 'sqlite3'
   
 end
