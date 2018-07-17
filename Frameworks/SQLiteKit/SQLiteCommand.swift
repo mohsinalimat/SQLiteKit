@@ -83,9 +83,19 @@ public class SQLiteCommand {
         return stmt
     }
     
-//    func executeScalar<T>() -> T {
-//
-//    }
+    func executeScalar<T: SQLiteTable>() -> T {
+        var t = T()
+        guard let stmt = prepare() else {
+            return t
+        }
+        let r = SQLite3.step(stmt)
+        if r == SQLite3.Result.row {
+            let colType = SQLite3.columnType(stmt, index: 0)
+            //t = readColumn(stmt, index: 0, columnType: colType, type: T.self)
+            t = T()
+        }
+        return t
+    }
     
     @discardableResult
     func executeNonQuery() -> Int {

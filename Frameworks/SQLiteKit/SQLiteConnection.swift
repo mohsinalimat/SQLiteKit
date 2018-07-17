@@ -45,13 +45,20 @@ public class SQLiteConnection {
         case noneColumnsFound
     }
     
+    /// SQLite libray version number.
+    public let libVersionNumber: Int
+    
+    /// Whether trace debug information
+    public var debugTrace: Bool = false
+    public var traceHandler: ((String) -> Void)?
+    
     fileprivate let dbPath: String
+    fileprivate let _open: Bool
     fileprivate var un_fair_lock = os_unfair_lock()
     fileprivate let openFlags: OpenFlags
     fileprivate var _mappings: [String: TableMapping] = [:]
     
-    let handle: DatabaseHandle
-    
+    internal let handle: DatabaseHandle
     
     /// Constructs a new SQLiteConnection and opens a SQLite database specified by databasePath.
     ///
@@ -68,10 +75,11 @@ public class SQLiteConnection {
     public init(databasePath: String, openFlags: OpenFlags) {
         self.dbPath = databasePath
         self.openFlags = openFlags
-        
+        self.libVersionNumber = SQLite3.libVersionNumber()
         var dbHandle: DatabaseHandle?
         let _ = SQLite3.open(filename: dbPath, db: &dbHandle, flags: openFlags)
         handle = dbHandle!
+        _open = true
     }
     
     deinit {
@@ -135,14 +143,33 @@ public class SQLiteConnection {
             migrateTable(map, existingCols: existingCols)
             result = .migrated
         }
+        // TODO: - create index
         return result
     }
     
+    // MARK: - Index
+    
+    /// Creates an index for the specified table and columns.
+    ///
+    /// - Parameters:
+    ///   - indexName: Name of the index to create
+    ///   - tableName: Name of the database table
+    ///   - columnName: Name of the column to index
+    ///   - unique: Whether the index should be unique
+    /// - Returns: result of create index
     @discardableResult
     public func createIndex(_ indexName: String, tableName: String, columnName: String, unique: Bool = false) -> Int {
         return createIndex(indexName, tableName: tableName, columnNames: [columnName], unique: unique)
     }
     
+    /// Creates an index for the specified table and columns.
+    ///
+    /// - Parameters:
+    ///   - indexName: Name of the index to create
+    ///   - tableName: Name of the database table
+    ///   - columnNames: Name of the columns to index
+    ///   - unique: Whether the index should be unique
+    /// - Returns: result of create index
     @discardableResult
     public func createIndex(_ indexName: String, tableName: String, columnNames: [String], unique: Bool = false) -> Int {
         let columns = columnNames.joined(separator: ",")
@@ -262,6 +289,10 @@ public class SQLiteConnection {
         
     }
     
+    public func executeScalar<T: SQLiteTable>(_ query: String, parameters: [Any] = []) -> T {
+        
+        return T()
+    }
 }
 
 extension SQLiteConnection {
