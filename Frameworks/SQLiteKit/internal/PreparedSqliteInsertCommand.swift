@@ -13,9 +13,17 @@ class PreparedSqliteInsertCommand {
     
     private let commandText: String
     
+    private var statement: SQLiteStatement?
+    
     init(connection: SQLiteConnection, commandText: String) {
         self.conn = connection
         self.commandText = commandText
+    }
+    
+    deinit {
+        if let stmt = statement {
+            SQLite3.finalize(stmt)
+        }
     }
     
     func executeNonQuery(_ args: [Any]) -> Int {

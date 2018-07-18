@@ -14,12 +14,22 @@ public struct TableMapping {
     public let createFlags: SQLiteConnection.CreateFlags
     
     public let columns: [Column]
+    
     public private(set) var insertColumns: [Column]
+    
     public private(set) var insertOrReplaceColumns: [Column]
+    
+    public let queryByPrimaryKeySQL: String
     
     public var pk: Column?
     
+    public var autoIncPK: Column?
+    
     public var withoutRowId: Bool = false
+    
+    public var hasAutoIncPK: Bool {
+        return autoIncPK != nil
+    }
     
     public init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
         let attributes = type.sqliteAttributes()
@@ -41,10 +51,18 @@ public struct TableMapping {
         insertColumns = columns.filter { return $0.isAutoInc == false }
         insertOrReplaceColumns = columns
         
-        for col in cols {
-            if col.isPK {
-                pk = col
+        for c in cols {
+            if c.isPK && c.isAutoInc {
+                autoIncPK = c
             }
+            if c.isPK {
+                pk = c
+            }
+        }
+        if let pk = pk {
+            queryByPrimaryKeySQL = "SELECT * FROM \(tableName) WHERE \(pk.name) = ?"
+        } else {
+            queryByPrimaryKeySQL = "SELECT * FROM \(tableName) LIMIT 1"
         }
         withoutRowId = false
     }

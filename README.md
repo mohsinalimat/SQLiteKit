@@ -1,7 +1,9 @@
 
 # SQLiteKit
 
-a portal of [SQLite-net](https://github.com/praeclarum/sqlite-net/)
+a Swift version of [SQLite-net](https://github.com/praeclarum/sqlite-net/).
+
+Using Codable and Mirror technology.
 
 
 ## Features

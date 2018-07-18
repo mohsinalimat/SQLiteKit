@@ -326,8 +326,16 @@ public class SQLiteConnection {
         return execute(sql, parameters: [pk.value])
     }
     
-    public func deleteAll<T: SQLiteTable>(_ type: T.Type)  {
-        
+    @discardableResult
+    public func deleteAll<T: SQLiteTable>(_ type: T.Type) -> Int {
+        let map = getMapping(of: T.self)
+        return deleteAll(map: map)
+    }
+    
+    @discardableResult
+    func deleteAll(map: TableMapping) -> Int {
+        let sql = "DELETE FROM \(map.tableName)"
+        return execute(sql)
     }
     
     public func close() {

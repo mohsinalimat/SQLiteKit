@@ -119,7 +119,7 @@ public class SQLiteCommand {
         guard let r = SQLite3.step(stmt) else {
             return 0
         }
-        
+        SQLite3.finalize(stmt)
         if r == SQLite3.Result.done {
             let rowsAffected = SQLite3.changes(conn.handle)
             return rowsAffected
