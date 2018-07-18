@@ -207,9 +207,25 @@ public class SQLiteConnection {
     
     // MARK: - Query
     
-    public func query<T: SQLiteTable>(_ query: String, parameters: [Any] = []) -> [T] {
+    public func query<T>(_ query: String, parameters: [Any] = []) -> [T] where T: SQLiteTable {
         let cmd = createCommand(query, parameters: parameters)
         return cmd.executeQuery()
+    }
+    
+    public func find<T: SQLiteTable>(_ pk: Any) -> T? {
+        let map = getMapping(of: T.self)
+        return query(map.queryByPrimaryKeySQL, parameters: [pk]).first
+    }
+    
+    
+    /// Attempts to retrieve the first object that matches the query from the table associated with the specified type.
+    ///
+    /// - Parameters:
+    ///   - sql: The fully escaped SQL.
+    ///   - parameters: Arguments to substitute for the occurences of '?' in the query.
+    /// - Returns: The object that matches the given predicate or `nil` if not found.
+    public func findWithQuery<T: SQLiteTable>(_ sql: String, parameters: [Any]) -> T? {
+        return query(sql, parameters: parameters).first
     }
     
     // MARK: - Transcation
