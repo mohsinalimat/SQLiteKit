@@ -64,7 +64,8 @@ func SQLitKitDemo() {
 ## Query
 
 ```swift
-public func query<T: SQLiteTable>(_ query: String, parameters: [Any] = []) -> [T]
+public func query<T>(_ query: String, parameters: [Any] = []) -> [T]
+public func find<T>(_ pk: Any) -> T?
 ```
 
 ## Insert
