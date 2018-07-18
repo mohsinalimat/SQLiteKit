@@ -14,6 +14,8 @@ public struct TableMapping {
     public let createFlags: SQLiteConnection.CreateFlags
     
     public let columns: [Column]
+    public private(set) var insertColumns: [Column]
+    public private(set) var insertOrReplaceColumns: [Column]
     
     public var pk: Column?
     
@@ -36,13 +38,14 @@ public struct TableMapping {
             cols.append(col)
         }
         columns = cols
+        insertColumns = columns.filter { return $0.isAutoInc == false }
+        insertOrReplaceColumns = columns
         
         for col in cols {
             if col.isPK {
                 pk = col
             }
         }
-        
         withoutRowId = false
     }
     
@@ -73,6 +76,11 @@ public struct TableMapping {
             isPK = columnAttr.first(where: { $0.attribute == Attribute.isPK }) != nil
             isAutoInc = columnAttr.first(where: { $0.attribute == Attribute.autoInc }) != nil
             columnType = type(of: propertyInfo.value)
+        }
+        
+        func getValue(of object: SQLiteTable) -> Any {
+            let mirror = Mirror(reflecting: object)
+            return mirror.children.first(where: { $0.label == name })!.value
         }
         
     }

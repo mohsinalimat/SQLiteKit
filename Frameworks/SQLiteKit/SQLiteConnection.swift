@@ -8,8 +8,18 @@
 import Foundation
 import SQLite3
 
+/// An open connection to a SQLite database.
 public class SQLiteConnection {
 
+    /// Flags to create a SQLite database
+    ///
+    /// - none: Use the default creation options
+    /// - implicitPK: Create a primary key index for a property called 'Id' (case-insensitive). This avoids the need for the [PrimaryKey] attribute.
+    /// - implicitIndex: Create indices for properties ending in 'Id' (case-insensitive).
+    /// - allImplicit: Create a primary key for a property called 'Id' and create an indices for properties ending in 'Id' (case-insensitive).
+    /// - autoIncPK: Force the primary key property to be auto incrementing. This avoids the need for the [AutoIncrement] attribute. The primary key property on the class should have type int or long.
+    /// - fullTextSearch3: Create virtual table using FTS3
+    /// - fullTextSearch4: Create virtual table using FTS4
     public enum CreateFlags: Int {
         case none = 0x000
         case implicitPK = 0x001
@@ -41,7 +51,8 @@ public class SQLiteConnection {
     }
     
     public enum CreateTableResult {
-        case created, migrated
+        case created
+        case migrated
         case noneColumnsFound
     }
     
@@ -57,8 +68,9 @@ public class SQLiteConnection {
     fileprivate var un_fair_lock = os_unfair_lock()
     fileprivate let openFlags: OpenFlags
     fileprivate var _mappings: [String: TableMapping] = [:]
+    fileprivate var _insertCommandMap: [String: PreparedSqliteInsertCommand] = [:]
     
-    internal let handle: DatabaseHandle
+    internal let handle: SQLiteDatabaseHandle
     
     /// Constructs a new SQLiteConnection and opens a SQLite database specified by databasePath.
     ///
@@ -76,7 +88,7 @@ public class SQLiteConnection {
         self.dbPath = databasePath
         self.openFlags = openFlags
         self.libVersionNumber = SQLite3.libVersionNumber()
-        var dbHandle: DatabaseHandle?
+        var dbHandle: SQLiteDatabaseHandle?
         let _ = SQLite3.open(filename: dbPath, db: &dbHandle, flags: openFlags)
         handle = dbHandle!
         _open = true
@@ -248,8 +260,12 @@ public class SQLiteConnection {
             return 0
         }
         let map = getMapping(of: object.mapType)
-        print(map)
-        return 0
+        let isReplacing = extra.uppercased() == "OR REPLACE"
+        let columns = isReplacing ? map.insertOrReplaceColumns: map.insertColumns
+        
+        let values: [Any] = columns.map { return $0.getValue(of: object) }
+        let cmd = getInsertCommand(map: map, extra: extra)
+        return cmd.executeNonQuery(values)
     }
     
     // MARK: - Update
@@ -336,13 +352,29 @@ extension SQLiteConnection {
         return query(sql)
     }
     
-    fileprivate func createCommand(_ cmdText: String, parameters: [Any]) -> SQLiteCommand {
+    func createCommand(_ cmdText: String, parameters: [Any]) -> SQLiteCommand {
         let cmd = SQLiteCommand(connection: self)
         cmd.commandText = cmdText
         for param in parameters {
             cmd.bind(param)
         }
         return cmd
+    }
+    
+    fileprivate func getInsertCommand(map: TableMapping, extra: String) -> PreparedSqliteInsertCommand {
+        var columns = map.insertColumns
+        let sql: String
+        if columns.count == 0 && map.columns.count == 1 && map.columns.first?.isAutoInc == true {
+            sql = "INSERT \(extra) INTO \(map.tableName) DEFAULT VALUES"
+        } else {
+            if extra.uppercased() == "OR REPLACE" {
+                columns = map.insertOrReplaceColumns
+            }
+            let keys = columns.map { return $0.name }.joined(separator: ",")
+            let values = [String].init(repeating: "?", count: columns.count).joined(separator: ",")
+            sql = "INSERT \(extra) INTO \(map.tableName) (\(keys)) VALUES (\(values))"
+        }
+        return PreparedSqliteInsertCommand(connection: self, commandText: sql)
     }
     
     fileprivate func lock() {

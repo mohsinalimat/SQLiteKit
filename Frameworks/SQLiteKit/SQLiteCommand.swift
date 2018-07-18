@@ -40,7 +40,7 @@ public class SQLiteCommand {
         
     }
     
-    func bindAll(_ stmt: Statement) {
+    func bindAll(_ stmt: SQLiteStatement) {
         var index = 1
         for var bind in _bindings {
             if let value = bind.value {
@@ -50,7 +50,7 @@ public class SQLiteCommand {
         }
     }
     
-    static func bindParameter(_ stmt: Statement, index: Int, value: Any?) {
+    static func bindParameter(_ stmt: SQLiteStatement, index: Int, value: Any?) {
         if let value = value {
             print(value)
         } else {
@@ -59,7 +59,7 @@ public class SQLiteCommand {
         
     }
     
-    func readColumn(_ stmt: Statement, index: Int, columnType: SQLite3.ColumnType, type: Any.Type) -> Any? {
+    func readColumn(_ stmt: SQLiteStatement, index: Int, columnType: SQLite3.ColumnType, type: Any.Type) -> Any? {
         if columnType == .Null {
             return nil
         }
@@ -77,7 +77,7 @@ public class SQLiteCommand {
         return nil
     }
     
-    func prepare() -> Statement? {
+    func prepare() -> SQLiteStatement? {
         let stmt = SQLite3.prepare(conn.handle, SQL: commandText)
         bindAll(stmt!)
         return stmt
@@ -159,4 +159,25 @@ public class SQLiteCommand {
         }
         return result
     }
+}
+
+class PreparedSqliteInsertCommand {
+    
+    private let conn: SQLiteConnection
+    
+    private let cmdText: String
+    
+    init(connection: SQLiteConnection, commandText: String) {
+        conn = connection
+        cmdText = commandText
+    }
+    
+    func executeNonQuery(_ args: [Any]) -> Int {
+        return 0
+//        for (index, arg) in args.enumerated() {
+//            SQLiteCommand.bindParameter(stmt, index: index, value: arg)
+//        }
+        //SQLite3.step(<#T##stmt: SQLiteStatement##SQLiteStatement#>)
+    }
+    
 }

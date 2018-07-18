@@ -31,7 +31,22 @@ extension SQLiteTable {
 
 public class SQLiteTableQuery<T: SQLiteTable> {
     
-    public init(connection: SQLiteConnection) {
+    private let conn: SQLiteConnection
+    private let table: TableMapping
+    
+    public init(connection: SQLiteConnection, table: TableMapping) {
+        self.conn = connection
+        self.table = table
+    }
+    
+    public func count() -> Int {
+        return 0
+    }
+    
+    private func generateCommand(_ selection: String) -> SQLiteCommand {
         
+        let cmdText = "SELECT \(selection) FROM \(table.tableName)"
+        let args: [Any] = []
+        return conn.createCommand(cmdText, parameters: args)
     }
 }
