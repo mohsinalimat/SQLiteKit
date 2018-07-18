@@ -228,6 +228,14 @@ public class SQLiteConnection {
         return query(sql, parameters: parameters).first
     }
     
+    /// Returns a queryable interface to the table represented by the given type.
+    ///
+    /// - Returns: A queryable object that is able to translate Where, OrderBy, and Take queries into native SQL.
+    public func table<T>() -> SQLiteTableQuery<T> where T: SQLiteTable {
+        let map = getMapping(of: T.self)
+        return SQLiteTableQuery<T>(connection: self, table: map)
+    }
+    
     // MARK: - Transcation
     
     public func beginTranscation() {

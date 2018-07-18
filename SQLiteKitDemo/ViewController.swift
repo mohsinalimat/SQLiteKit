@@ -11,7 +11,7 @@ import SQLiteKit
 
 class ViewController: UIViewController {
 
-    var db: SQLiteConnection?
+    var db: SQLiteConnection!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,14 +21,19 @@ class ViewController: UIViewController {
         //try? FileManager.default.removeItem(atPath: dbPath)
         
         db = SQLiteConnection(databasePath: dbPath)
-        db?.createTable(User.self)
+        db.createTable(User.self)
         
         let user = User()
         user.name = "Tom"
         user.age = 20
         user.birthday = Date()
         
-        db?.insert(user)
+        //db?.insert(user)
+        
+        
+        let userTable: SQLiteTableQuery<User> = db.table()
+        let users = userTable.list()
+        print(users.count)
     }
 
     override func didReceiveMemoryWarning() {

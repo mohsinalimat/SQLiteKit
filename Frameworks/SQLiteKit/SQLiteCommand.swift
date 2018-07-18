@@ -86,6 +86,11 @@ public class SQLiteCommand {
             return SQLite3.columnInt(stmt, index: index) == 1
         } else if type is Float.Type || type is Double.Type {
             return SQLite3.columnDouble(stmt, index: index)
+        } else if type is Date.Type {
+            let interval = SQLite3.columnDouble(stmt, index: index)
+            return interval
+            //let date = Date(timeIntervalSince1970: interval)
+            //return dateFormatter.string(from: date)
         }
         
         return nil
@@ -175,4 +180,10 @@ public class SQLiteCommand {
     }
 }
 
-
+private let dateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    formatter.timeZone = TimeZone(secondsFromGMT: 0)
+    return formatter
+}()

@@ -51,4 +51,8 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         let args: [Any] = []
         return conn.createCommand(cmdText, parameters: args)
     }
+    
+    public func list() -> [T] {
+        return generateCommand("*").executeQuery()
+    }
 }
