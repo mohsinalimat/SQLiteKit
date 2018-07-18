@@ -60,19 +60,16 @@ class SQLite3 {
     
     @discardableResult
     static func open(filename: String, db: inout SQLiteDatabaseHandle?, flags: SQLiteConnection.OpenFlags) -> Result? {
-        let result = sqlite3_open_v2(filename, &db, flags.rawValue , nil)
-        return Result(rawValue: result)
+        return Result(rawValue: sqlite3_open_v2(filename, &db, flags.rawValue , nil))
     }
     
     @discardableResult
     static func close(_ handle: SQLiteDatabaseHandle) -> Result? {
-        let result = sqlite3_close_v2(handle)
-        return Result(rawValue: result)
+        return Result(rawValue: sqlite3_close_v2(handle))
     }
     
     static func busyTimeout(_ db: SQLiteDatabaseHandle, milliseconds: Int) -> Result? {
-        let result = sqlite3_busy_timeout(db, Int32(milliseconds))
-        return Result(rawValue: result)
+        return Result(rawValue: sqlite3_busy_timeout(db, Int32(milliseconds)))
     }
     
     static func changes(_ db: SQLiteDatabaseHandle) -> Int {
@@ -87,14 +84,17 @@ class SQLite3 {
     
     @discardableResult
     static func step(_ stmt: SQLiteStatement) -> Result? {
-        let result = sqlite3_step(stmt)
-        return Result(rawValue: result)
+        return Result(rawValue: sqlite3_step(stmt))
     }
     
     @discardableResult
     static func reset(_ stmt: SQLiteStatement) -> Result? {
-        let result = sqlite3_reset(stmt)
-        return Result(rawValue: result)
+        return Result(rawValue: sqlite3_reset(stmt))
+    }
+    
+    @discardableResult
+    static func finalize(_ stmt: SQLiteStatement) -> Result? {
+        return Result(rawValue: sqlite3_finalize(stmt))
     }
     
     static func lastInsertRowid(_ db: SQLiteDatabaseHandle) -> Int64 {
@@ -108,8 +108,7 @@ class SQLite3 {
     // MARK: - Bind Begin
     @discardableResult
     static func bindParameterIndex(_ stmt: SQLiteStatement, name: String) -> Int {
-        let result = sqlite3_bind_parameter_index(stmt, name)
-        return Int(result)
+        return Int(sqlite3_bind_parameter_index(stmt, name))
     }
     
     @discardableResult
@@ -151,13 +150,11 @@ class SQLite3 {
     }
     
     static func columnName(_ stmt: SQLiteStatement, index: Int) -> String {
-        let str = sqlite3_column_name(stmt, Int32(index))!
-        return String(cString: str)
+        return String(cString: sqlite3_column_name(stmt, Int32(index))!)
     }
     
     static func columnType(_ stmt: SQLiteStatement, index: Int) -> ColumnType {
-        let type = sqlite3_column_type(stmt, Int32(index))
-        return ColumnType(rawValue: type)!
+        return ColumnType(rawValue: sqlite3_column_type(stmt, Int32(index)))!
     }
     
     static func columnInt(_ stmt: SQLiteStatement, index: Int) -> Int {
@@ -173,13 +170,11 @@ class SQLite3 {
     }
     
     static func columnText(_ stmt: SQLiteStatement, index: Int) -> String {
-        let str = sqlite3_column_text(stmt, Int32(index))!
-        return String(cString: str)
+        return String(cString: sqlite3_column_text(stmt, Int32(index))!)
     }
     
     static func columnBlob(_ stmt: SQLiteStatement, index: Int) -> UnsafeRawPointer? {
-        let blob = sqlite3_column_blob(stmt, Int32(index))
-        return blob
+        return sqlite3_column_blob(stmt, Int32(index))
     }
     
     static func libVersionNumber() -> Int {

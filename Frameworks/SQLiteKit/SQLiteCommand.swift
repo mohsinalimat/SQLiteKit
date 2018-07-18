@@ -10,11 +10,11 @@ import Foundation
 public class SQLiteCommand {
     
     struct Binding {
-        public let name: String
+        public let name: String?
         public let value: Any?
         public var index: Int = 0
         
-        init(name: String, value: Any?) {
+        init(name: String?, value: Any?) {
             self.name = name
             self.value = value
             self.index = 0
@@ -31,28 +31,42 @@ public class SQLiteCommand {
         conn = connection
     }
     
-    func bind(_ name: String, value: Any) {
+    func bind(_ name: String?, value: Any) {
         let binding = Binding(name: name, value: value)
         _bindings.append(binding)
     }
     
     func bind(_ value: Any) {
-        
+        bind(nil, value: value)
     }
     
     func bindAll(_ stmt: SQLiteStatement) {
         var index = 1
         for var bind in _bindings {
-            if let value = bind.value {
-                print(value)
+            if let name = bind.name {
+                bind.index = SQLite3.bindParameterIndex(stmt, name: name)
+            } else {
+                index += 1
+                bind.index = index
             }
-            bind.index = SQLite3.bindParameterIndex(stmt, name: bind.name)
+            SQLiteCommand.bindParameter(stmt, index: index, value: bind.value)
         }
     }
     
     static func bindParameter(_ stmt: SQLiteStatement, index: Int, value: Any?) {
         if let value = value {
-            print(value)
+            if let v = value as? String {
+                SQLite3.bindText(stmt, index: index, value: v)
+            } else if let v = value as? Bool {
+                SQLite3.bindInt(stmt, index: index, value: v ? 1 : 0)
+            } else if let v = value as? Int {
+                SQLite3.bindInt(stmt, index: index, value: v)
+            } else if let v = value as? Date {
+                let interval = v.timeIntervalSince1970
+                SQLite3.bindDouble(stmt, index: index, value: interval)
+            } else if let v = value as? URL {
+                SQLite3.bindText(stmt, index: index, value: v.absoluteString)
+            }
         } else {
             SQLite3.bindNull(stmt, index: index)
         }
@@ -161,23 +175,4 @@ public class SQLiteCommand {
     }
 }
 
-class PreparedSqliteInsertCommand {
-    
-    private let conn: SQLiteConnection
-    
-    private let cmdText: String
-    
-    init(connection: SQLiteConnection, commandText: String) {
-        conn = connection
-        cmdText = commandText
-    }
-    
-    func executeNonQuery(_ args: [Any]) -> Int {
-        return 0
-//        for (index, arg) in args.enumerated() {
-//            SQLiteCommand.bindParameter(stmt, index: index, value: arg)
-//        }
-        //SQLite3.step(<#T##stmt: SQLiteStatement##SQLiteStatement#>)
-    }
-    
-}
+

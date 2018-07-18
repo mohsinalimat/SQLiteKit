@@ -144,7 +144,6 @@ public class SQLiteConnection {
             let declaration = declarationList.joined(separator: ",")
             sql += declaration
             sql += ")"
-            print(sql)
             if map.withoutRowId {
                 sql += " WITHOUT ROWID"
             }
@@ -227,6 +226,10 @@ public class SQLiteConnection {
         
     }
     
+    public func runInTranscation(_ block: () -> Void) {
+        
+    }
+    
     // MARK: - Insert
     
     /// Inserts the given object (and updates its auto incremented primary key if it has one).
@@ -272,6 +275,26 @@ public class SQLiteConnection {
         let values: [Any] = columns.map { return $0.getValue(of: object) }
         let cmd = getInsertCommand(map: map, extra: extra)
         return cmd.executeNonQuery(values)
+    }
+    
+    
+    /// Inserts all specified objects.
+    ///
+    /// - Parameters:
+    ///   - objects: Objects to insert
+    ///   - inTranscation: A boolean indicating if the inserts should be wrapped in a transaction.
+    /// - Returns: The number of rows added to the table.
+    @discardableResult
+    public func insertAll(_ objects: [SQLiteTable], inTranscation: Bool = false) -> Int {
+        var result = 0
+        if inTranscation {
+            
+        } else {
+            for obj in objects {
+                result += insert(obj)
+            }
+        }
+        return result
     }
     
     // MARK: - Update

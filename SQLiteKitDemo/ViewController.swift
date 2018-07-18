@@ -18,9 +18,9 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         let dbPath = NSHomeDirectory().appending("/Documents/db.sqlite")
+        //try? FileManager.default.removeItem(atPath: dbPath)
         
         db = SQLiteConnection(databasePath: dbPath)
-        
         db?.createTable(User.self)
         
         let user = User()
