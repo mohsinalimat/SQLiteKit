@@ -140,7 +140,7 @@ public class SQLiteConnection {
                 using = "USING FTS4"
             }
             var sql = "CREATE \(virtual)TABLE IF NOT EXISTS \(map.tableName) \(using)("
-            let declarationList = map.columns.map { return TableMapping.ORM.sqlDeclaration(of: $0) }
+            let declarationList = map.columns.map { return SQLiteORM.sqlDeclaration(of: $0) }
             let declaration = declarationList.joined(separator: ",")
             sql += declaration
             sql += ")"
@@ -229,8 +229,7 @@ public class SQLiteConnection {
     
     // MARK: - Insert
     
-    /// Inserts the given object (and updates its
-    /// auto incremented primary key if it has one).
+    /// Inserts the given object (and updates its auto incremented primary key if it has one).
     /// The return value is the number of rows added to the table.
     ///
     /// - Parameter obj: The object to insert.
@@ -240,6 +239,13 @@ public class SQLiteConnection {
         return insert(obj, extra: "")
     }
     
+    
+    /// Inserts the given object (and updates its auto incremented primary key if it has one).
+    /// The return value is the number of rows added to the table.
+    /// If a UNIQUE constraint violation occurs with some pre-existing object, this function deletes the old objects
+    ///
+    /// - Parameter obj: The object to insert.
+    /// - Returns: The number of rows modified.
     @discardableResult
     public func insertOrReplace(_ obj: SQLiteTable?) -> Int {
         return insert(obj, extra: "OR REPLACE")
@@ -341,7 +347,7 @@ extension SQLiteConnection {
             newCols.append(column)
         }
         for p in newCols {
-            let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(TableMapping.ORM.sqlDeclaration(of: p))"
+            let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(SQLiteORM.sqlDeclaration(of: p))"
             execute(sql)
         }
         print(newCols)

@@ -10,9 +10,11 @@ import Foundation
 /// Type to reflect to a database table
 public protocol SQLiteTable: class, Codable {
     
+    
+    /// Required initializer. used for Mirror reflecting of Object ORM
     init()
 
-    /// specifiy column attributes of a table, eg: isPK
+    /// Specifiy column attributes of a table, eg: isPK
     ///
     /// - Returns: column attributes
     static func sqliteAttributes() -> [SQLiteAttribute]
@@ -21,7 +23,7 @@ public protocol SQLiteTable: class, Codable {
 
 extension SQLiteTable {
 
-    /// return mapping type of SQLiteTable
+    /// Return mapping type of SQLiteTable
     internal var mapType: SQLiteTable.Type {
         let mirror = Mirror(reflecting: self)
         return mirror.subjectType as! SQLiteTable.Type
