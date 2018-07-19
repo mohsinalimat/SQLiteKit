@@ -32,8 +32,8 @@ class ViewController: UIViewController {
         
         
         let userTable: SQLiteTableQuery<User> = db.table()
-        let users = userTable.list()
-        print(users.count)
+        let count = userTable.count
+        print(count)
     }
 
     override func didReceiveMemoryWarning() {
@@ -50,6 +50,8 @@ class User: SQLiteTable {
     var age: Int
     
     var birthday: Date
+    
+    var avatarData: Data?
     
     static func sqliteAttributes() -> [SQLiteAttribute] {
         return [

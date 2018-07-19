@@ -102,18 +102,16 @@ public class SQLiteCommand {
         return stmt
     }
     
-    func executeScalar<T: SQLiteTable>() -> T {
-        var t = T()
+    func executeScalar<T>() -> T? {
         guard let stmt = prepare() else {
-            return t
+            return nil
         }
         let r = SQLite3.step(stmt)
         if r == SQLite3.Result.row {
             let colType = SQLite3.columnType(stmt, index: 0)
-            //t = readColumn(stmt, index: 0, columnType: colType, type: T.self)
-            t = T()
+            return readColumn(stmt, index: 0, columnType: colType, type: T.self) as? T
         }
-        return t
+        return nil
     }
     
     @discardableResult

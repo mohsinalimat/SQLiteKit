@@ -41,8 +41,11 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         self.table = table
     }
     
-    public func count() -> Int {
-        return 0
+    
+    /// Execute SELECT COUNT(*) FROM `Table`
+    public var count: Int {
+        let c: Int = generateCommand("COUNT(*)").executeScalar() ?? 0
+        return c
     }
     
     private func generateCommand(_ selection: String) -> SQLiteCommand {
@@ -52,7 +55,29 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         return conn.createCommand(cmdText, parameters: args)
     }
     
+    /// Execute SELECT * FROM `Table`
+    ///
+    /// - Returns: All rows
     public func list() -> [T] {
         return generateCommand("*").executeQuery()
+    }
+    
+    public func filter<T: SQLiteTable>(_ isIncluded: (T) -> Bool) -> [T] {
+        return []
+    }
+    
+    public func filter(_ isIncluded: Bool) {
+        
+    }
+    
+    public func orderBy() -> SQLiteTableQuery<T> {
+        let q: SQLiteTableQuery<T> = clone()
+        return q
+    }
+    
+    func clone<T: SQLiteTable>() -> SQLiteTableQuery<T> {
+        let query = SQLiteTableQuery<T>(connection: conn, table: table)
+        
+        return query
     }
 }

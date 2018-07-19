@@ -236,6 +236,16 @@ public class SQLiteConnection {
         return SQLiteTableQuery<T>(connection: self, table: map)
     }
     
+    
+    /// Returns a queryable interface to the table represented by the given type.
+    ///
+    /// - Parameter Type to reflect to a database table
+    /// - Returns: A queryable object that is able to translate Where, OrderBy, and Take queries into native SQL.
+    public func table<T>(of type: SQLiteTable.Type) -> SQLiteTableQuery<T> where T: SQLiteTable {
+        let map = getMapping(of: type)
+        return SQLiteTableQuery<T>(connection: self, table: map)
+    }
+    
     // MARK: - Transcation
     
     public func beginTranscation() {
@@ -405,7 +415,6 @@ extension SQLiteConnection {
             let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(SQLiteORM.sqlDeclaration(of: p))"
             execute(sql)
         }
-        print(newCols)
     }
     
     fileprivate func getExistingColumns(tableName: String) -> [ColumnInfo] {
