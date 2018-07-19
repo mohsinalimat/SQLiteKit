@@ -7,6 +7,11 @@
 
 import Foundation
 
+struct Ordering {
+    let name: String
+    let ascending: Bool
+}
+
 public struct TableMapping {
     
     public let tableName: String
