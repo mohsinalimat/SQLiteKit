@@ -24,14 +24,22 @@ public struct Attribute: OptionSet {
     }
     
     public static let none = Attribute(rawValue: 1 << 0)
+
+    /// Column in primary key
     public static let isPK = Attribute(rawValue: 1 << 1)
+    
+    /// Column auto increasement.
     public static let autoInc = Attribute(rawValue: 1 << 2)
-    public static let nullable = Attribute(rawValue: 1 << 3)
+
+    /// Column value can not be null
+    public static let nonull = Attribute(rawValue: 1 << 3)
+    
+    /// Create index
     public static let indexed = Attribute(rawValue: 1 << 4)
     
-    /// specify table name
+    /// Table name
     public static let tableName = Attribute(rawValue: 1 << 5)
     
-    /// member that defins when `ignore` will not create column
+    /// Member that defins when `ignore` will not create column
     public static let ignore = Attribute(rawValue: 1 << 6)
 }

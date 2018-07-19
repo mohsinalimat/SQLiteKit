@@ -344,6 +344,14 @@ public class SQLiteConnection {
         return 0
     }
     
+    fileprivate func update<T: SQLiteTable>(_ obj: T) -> Int {
+        let map = getMapping(of: T.self)
+        //let pk = map.pk
+        //let cols = map.columns.filter { return $0.isPK == false }
+        let sql = String(format: "UPDATE %@ SET WHERE = ?", map.tableName)
+        return execute(sql)
+    }
+    
     // MARK: - Delete
     
     /// Deletes the given object from the database using its primary key.
@@ -360,6 +368,11 @@ public class SQLiteConnection {
         return execute(sql, parameters: [pk.value])
     }
     
+    
+    /// Delete all table data
+    ///
+    /// - Parameter type: Type to reflect to a database table.
+    /// - Returns: Rows deleted
     @discardableResult
     public func deleteAll<T: SQLiteTable>(_ type: T.Type) -> Int {
         let map = getMapping(of: T.self)
@@ -367,7 +380,7 @@ public class SQLiteConnection {
     }
     
     @discardableResult
-    func deleteAll(map: TableMapping) -> Int {
+    fileprivate func deleteAll(map: TableMapping) -> Int {
         let sql = "DELETE FROM \(map.tableName)"
         return execute(sql)
     }

@@ -87,12 +87,13 @@ public class SQLiteCommand {
         } else if type is Float.Type || type is Double.Type {
             return SQLite3.columnDouble(stmt, index: index)
         } else if type is Date.Type {
-            let interval = SQLite3.columnDouble(stmt, index: index)
-            return interval
             //let date = Date(timeIntervalSince1970: interval)
             //return dateFormatter.string(from: date)
+            let interval = SQLite3.columnDouble(stmt, index: index)
+            return interval
+        } else if type is URL.Type {
+            return SQLite3.columnText(stmt, index: index)
         }
-        
         return nil
     }
     
