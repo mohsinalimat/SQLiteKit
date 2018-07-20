@@ -65,15 +65,16 @@ func SQLitKitDemo() {
 
 SQLiteTable support following native Swift Types.
 
-```swift
-Int
-Float
-Double
-String
-Date
-Data
-Optional<T>
-```
+| Swift Type      | SQLite Type |
+| --------------- | ----------- |
+| `Int`           | `INTEGER`   |
+| `Float `        | `REAL`      |
+| `Double `       | `REAL`      |
+| `String`        | `TEXT`      |
+| `Date`          | `REAL`      |
+| `nil`           | `NULL`      |
+| `Data`          | `BLOB`      |
+| `Optional<T>`   | `T`         |
 
 T should beo one of  `Int`, `Float`, `Double`, `String`, `Date` or `Data`。
 
