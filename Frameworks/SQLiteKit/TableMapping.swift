@@ -76,6 +76,10 @@ public struct TableMapping {
         return columns.first(where: { $0.name == name })
     }
     
+    func setAutoIncPK(_ rowID: Int64) {
+        
+    }
+    
     public class Column {
         
         public let name: String

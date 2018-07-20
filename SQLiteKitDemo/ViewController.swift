@@ -45,6 +45,8 @@ class ViewController: UIViewController {
 
 class User: SQLiteTable {
     
+    var userID: Int
+    
     var name: String
     
     var age: Int
@@ -55,10 +57,13 @@ class User: SQLiteTable {
     
     static func sqliteAttributes() -> [SQLiteAttribute] {
         return [
+            SQLiteAttribute(name: "userID", attribute: .isPK),
+            SQLiteAttribute(name: "userID", attribute: .autoInc)
         ]
     }
     
     required init() {
+        userID = 0
         name = ""
         age = 0
         birthday = Date()

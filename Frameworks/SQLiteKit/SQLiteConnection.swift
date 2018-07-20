@@ -11,6 +11,11 @@ import SQLite3
 /// An open connection to a SQLite database.
 public class SQLiteConnection {
 
+    public enum ConnectionString {
+        case inMemory
+        case URL(URL)
+    }
+    
     /// Flags to create a SQLite database
     ///
     /// - none: Use the default creation options
@@ -308,7 +313,13 @@ public class SQLiteConnection {
         
         let values: [Any] = columns.map { return $0.getValue(of: object) }
         let cmd = getInsertCommand(map: map, extra: extra)
-        return cmd.executeNonQuery(values)
+        let rows = cmd.executeNonQuery(values)
+        if map.hasAutoIncPK {
+            let id = SQLite3.lastInsertRowid(handle)
+            print(id)
+            //map.setAutoIncPK()
+        }
+        return rows
     }
     
     
@@ -344,12 +355,19 @@ public class SQLiteConnection {
         return 0
     }
     
-    fileprivate func update<T: SQLiteTable>(_ obj: T) -> Int {
+    @discardableResult
+    public func update<T: SQLiteTable>(_ obj: T) -> Int {
         let map = getMapping(of: T.self)
+        guard let pk = map.pk else {
+            return 0
+        }
         //let pk = map.pk
-        //let cols = map.columns.filter { return $0.isPK == false }
-        let sql = String(format: "UPDATE %@ SET WHERE = ?", map.tableName)
-        return execute(sql)
+        let cols = map.columns.filter { return $0.isPK == false }
+        let sets = cols.map { return "\($0.name) = ?" }.joined(separator: ",")
+        var values: [Any] = cols.map { return $0.getValue(of: obj) }
+        values.append(pk.getValue(of: obj))
+        let sql = String(format: "UPDATE %@ SET %@ WHERE %@ = ?", map.tableName, sets, pk.name)
+        return execute(sql, parameters: values)
     }
     
     // MARK: - Delete
