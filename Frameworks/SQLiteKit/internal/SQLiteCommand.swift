@@ -188,6 +188,42 @@ class SQLiteCommand {
     }
 }
 
+class PreparedSqliteInsertCommand {
+    
+    private let conn: SQLiteConnection
+    
+    private let commandText: String
+    
+    private var statement: SQLiteStatement?
+    
+    init(connection: SQLiteConnection, commandText: String) {
+        self.conn = connection
+        self.commandText = commandText
+    }
+    
+    deinit {
+        if let stmt = statement {
+            SQLite3.finalize(stmt)
+        }
+    }
+    
+    func executeNonQuery(_ args: [Any]) -> Int {
+        guard let stmt = SQLite3.prepare(conn.handle, SQL: commandText) else {
+            return 0
+        }
+        for (index, arg) in args.enumerated() {
+            SQLiteCommand.bindParameter(stmt, index: index + 1, value: arg)
+        }
+        let r = SQLite3.step(stmt)
+        if r == SQLite3.Result.done {
+            let rows = SQLite3.changes(conn.handle)
+            return rows
+        }
+        return 0
+    }
+    
+}
+
 private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyy-MM-dd HH:mm:ss.SSS"

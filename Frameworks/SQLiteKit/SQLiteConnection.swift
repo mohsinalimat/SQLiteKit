@@ -171,7 +171,7 @@ public class SQLiteConnection {
                 using = "USING FTS4"
             }
             var sql = "CREATE \(virtual)TABLE IF NOT EXISTS \(map.tableName) \(using)("
-            let declarationList = map.columns.map { return SQLiteORM.sqlDeclaration(of: $0) }
+            let declarationList = map.columns.map { return $0.declaration }
             let declaration = declarationList.joined(separator: ",")
             sql += declaration
             sql += ")"
@@ -500,7 +500,7 @@ extension SQLiteConnection {
             newCols.append(column)
         }
         for p in newCols {
-            let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(SQLiteORM.sqlDeclaration(of: p))"
+            let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(p.declaration)"
             try execute(sql)
         }
     }
