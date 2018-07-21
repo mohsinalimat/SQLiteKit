@@ -32,6 +32,14 @@ SQLiteKit is available through CocoaPods. To install it, simply add the followin
 pod 'SQLiteKit'
 ```
 
+## Documentation
+
+- [Supported Swift Type](#Supported-Type)
+- [Query](#Query)
+- [Insert](#Insert)
+- [Update](#Update)
+- [Delete](#Delete)
+
 ## Example 
 
 ```swift
@@ -65,7 +73,7 @@ func SQLitKitDemo() {
 }
 ```
 
-## Support Type
+## Supported-Type
 
 SQLiteTable support following native Swift Types.
 
