@@ -7,9 +7,9 @@
 
 import Foundation
 
-struct Ordering {
-    let name: String
-    let ascending: Bool
+public struct Ordering {
+    public let name: String
+    public let ascending: Bool
 }
 
 public struct TableMapping {
@@ -77,7 +77,7 @@ public struct TableMapping {
     }
     
     func setAutoIncPK(_ rowID: Int64) {
-        
+        // TODO: - Use reflection to set primary key value
     }
     
     public class Column {

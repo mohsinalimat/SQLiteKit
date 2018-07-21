@@ -316,8 +316,7 @@ public class SQLiteConnection {
         let rows = cmd.executeNonQuery(values)
         if map.hasAutoIncPK {
             let id = SQLite3.lastInsertRowid(handle)
-            print(id)
-            //map.setAutoIncPK()
+            map.setAutoIncPK(id)
         }
         return rows
     }

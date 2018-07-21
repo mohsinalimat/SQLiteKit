@@ -30,7 +30,7 @@ extension SQLiteTable {
     }
 }
 
-
+/// A query
 public class SQLiteTableQuery<T: SQLiteTable> {
     
     private let conn: SQLiteConnection
@@ -41,7 +41,6 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         self.table = table
     }
     
-    
     /// Execute SELECT COUNT(*) FROM `Table`
     public var count: Int {
         let c: Int = generateCommand("COUNT(*)").executeScalar() ?? 0
@@ -49,7 +48,6 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     }
     
     private func generateCommand(_ selection: String) -> SQLiteCommand {
-        
         let cmdText = "SELECT \(selection) FROM \(table.tableName)"
         let args: [Any] = []
         return conn.createCommand(cmdText, parameters: args)
@@ -58,7 +56,7 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     /// Execute SELECT * FROM `Table`
     ///
     /// - Returns: All rows
-    public func list() -> [T] {
+    public func toList() -> [T] {
         return generateCommand("*").executeQuery()
     }
     
@@ -68,6 +66,17 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     
     public func filter(_ isIncluded: Bool) {
         
+    }
+    
+    /// Filter using NSPredicate.
+    /// NOTE: Key used in predicate must be one of properties name within your table model.
+    ///
+    /// - Parameter predicate: predicate
+    /// - Returns: All objects that match the predicate
+    public func filter<T: SQLiteTable>(using predicate: NSPredicate) -> [T] {
+        let predication = predicate.predicateFormat
+        let cmdText = "SELECT * FROM \(table.tableName) WHERE \(predication)"
+        return conn.createCommand(cmdText, parameters: []).executeQuery()
     }
     
     public func orderBy() -> SQLiteTableQuery<T> {

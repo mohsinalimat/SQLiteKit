@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class SQLiteCommand {
+class SQLiteCommand {
     
     struct Binding {
         public let name: String?
@@ -25,7 +25,7 @@ public class SQLiteCommand {
     
     fileprivate var _bindings: [Binding] = []
     
-    public var commandText: String = ""
+    var commandText: String = ""
     
     init(connection: SQLiteConnection) {
         conn = connection

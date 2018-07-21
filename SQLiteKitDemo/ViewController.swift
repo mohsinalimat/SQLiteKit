@@ -11,29 +11,55 @@ import SQLiteKit
 
 class ViewController: UIViewController {
 
+    let dbPath = NSHomeDirectory().appending("/Documents/db.sqlite")
     var db: SQLiteConnection!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let dbPath = NSHomeDirectory().appending("/Documents/db.sqlite")
-        //try? FileManager.default.removeItem(atPath: dbPath)
+        // deleteDatabase()
         
         db = SQLiteConnection(databasePath: dbPath)
         db.createTable(User.self)
         
-        let user = User()
-        user.name = "Tom"
-        user.age = 20
-        user.birthday = Date()
+        //insertUsers()
         
-        //db?.insert(user)
+        queryUser()
+    }
+    
+    fileprivate func deleteDatabase() {
+        try? FileManager.default.removeItem(atPath: dbPath)
+    }
+    
+    fileprivate func queryUser() {
+        let userQuery: SQLiteTableQuery<User> = db.table()
+        let count = userQuery.count
+        print("find users count:\(count)")
+        let users: [User] = db.table().list()
+        print(users)
         
+        let a: [User] = userQuery.filter(using: NSPredicate(format: "name = %@", "A"))
+        if a.count > 0 {
+            
+        }
+    }
+    
+    fileprivate func insertUsers() {
+        let users = [
+            ("A", 11),
+            ("B", 12),
+            ("C", 13),
+            ("D", 14)
+        ]
         
-        let userTable: SQLiteTableQuery<User> = db.table()
-        let count = userTable.count
-        print(count)
+        users.forEach { item in
+            let user = User()
+            user.name = item.0
+            user.age = item.1
+            db.insert(user)
+        }
+        
     }
 
     override func didReceiveMemoryWarning() {
@@ -43,7 +69,7 @@ class ViewController: UIViewController {
 }
 
 
-class User: SQLiteTable {
+class User: SQLiteTable, CustomStringConvertible {
     
     var userID: Int
     
@@ -67,5 +93,9 @@ class User: SQLiteTable {
         name = ""
         age = 0
         birthday = Date()
+    }
+    
+    var description: String {
+        return "userID: \(userID), name: \(name), age:\(age), birthday:\(birthday)"
     }
 }

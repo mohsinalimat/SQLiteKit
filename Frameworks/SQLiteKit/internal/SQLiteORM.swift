@@ -10,7 +10,7 @@ import Foundation
 class SQLiteORM {
     
     class func sqlDeclaration(of column: TableMapping.Column) -> String {
-        var decl = "'\(column.name)' \(sqlType(of: column))"
+        var decl = "'\(column.name)' \(sqlType(of: column)) "
         if column.isPK {
             decl += "PRIMARY KEY "
         }

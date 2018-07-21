@@ -11,6 +11,12 @@ Using Codable and Mirror technology.
 - [x] ORM 
 - [x] Auto table migration
 
+## In-Progress
+
+* Auto increase primary key value is not set when insert into table
+* Transcation
+* Create Index on table
+* ...
 
 ## Requirements
 
@@ -80,12 +86,31 @@ T should beo one of  `Int`, `Float`, `Double`, `String`, `Date` or `Data`。
 
 ## Query
 
+You can use API defined in `SQLiteConnection` to query.
+
 ```swift
 public func query<T>(_ query: String, parameters: [Any] = []) -> [T]
 public func find<T>(_ pk: Any) -> T?
 ```
 
+Or you can create a queryable object of your table.
+
+```swift
+let queryTable: SQLiteTableQuery<T> = db.table() 
+```
+
+SQLiteTableQuery<T> have following APIs: 
+
+```swift
+public var count: Int { get }
+public func toList() -> [T]
+public func filter<T: SQLiteTable>(using predicate: NSPredicate) -> [T]
+public func orderBy() -> SQLiteTableQuery<T>
+```
+
 ## Insert
+
+Insert into table is pretty easy.
 
 ```swift
 
