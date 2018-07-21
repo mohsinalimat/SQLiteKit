@@ -73,7 +73,8 @@ func SQLitKitDemo() {
 }
 ```
 
-## Supported-Type
+Supported-Type
+=======
 
 SQLiteTable support following native Swift Types.
 
@@ -90,7 +91,8 @@ SQLiteTable support following native Swift Types.
 
 T should be one of  `Int`, `Float`, `Double`, `String`, `Date` or `Data`。
 
-## Query
+Query
+=======
 
 You can use API defined in `SQLiteConnection` to query.
 
@@ -114,7 +116,8 @@ public func filter<T: SQLiteTable>(using predicate: NSPredicate) -> [T]
 public func orderBy() -> SQLiteTableQuery<T>
 ```
 
-## Insert
+Insert
+=======
 
 Insert into table is pretty easy.
 
@@ -125,14 +128,16 @@ public func insertOrReplace(_ obj: SQLiteTable?) -> Int
 public func insertAll(_ objects: [SQLiteTable], inTranscation: Bool = false) -> Int
 ```
 
-## Update
+Update
+=======
 
 ```swift
 public func update(_ obj: SQLiteTable) -> Int
 
 ```
 
-## Delete
+Delete
+=======
 
 ```swift
 public func delete(_ obj: SQLiteTable) -> Int
