@@ -10,14 +10,13 @@ import Foundation
 /// Type to reflect to a database table
 public protocol SQLiteTable: class, Codable {
     
-    
     /// Required initializer. used for Mirror reflecting of Object ORM
     init()
 
     /// Specifiy column attributes of a table, eg: isPK
     ///
     /// - Returns: column attributes
-    static func sqliteAttributes() -> [SQLiteAttribute]
+    static func attributes() -> [SQLiteAttribute]
     
 }
 

@@ -138,9 +138,10 @@ class SQLite3 {
     
     @discardableResult
     static func bindBlob(_ stmt: SQLiteStatement, index: Int, value: Data) -> Int {
-//        value.copyBytes(to: <#T##UnsafeMutableBufferPointer<DestinationType>#>)
-//        return Int(sqlite3_bind_blob(stmt, Int32(index), value.bytes, <#T##n: Int32##Int32#>, <#T##((UnsafeMutableRawPointer?) -> Void)!##((UnsafeMutableRawPointer?) -> Void)!##(UnsafeMutableRawPointer?) -> Void#>))
-        return 0
+        let r = value.withUnsafeBytes { bytes in
+            sqlite3_bind_blob(stmt, Int32(index), bytes, Int32(value.count), SQLITE_TRANSIENT)
+        }
+        return Int(r)
     }
     
     // MARK: - Column
@@ -173,8 +174,12 @@ class SQLite3 {
         return String(cString: sqlite3_column_text(stmt, Int32(index))!)
     }
     
-    static func columnBlob(_ stmt: SQLiteStatement, index: Int) -> UnsafeRawPointer? {
-        return sqlite3_column_blob(stmt, Int32(index))
+    static func columnBlob(_ stmt: SQLiteStatement, index: Int) -> Data? {
+        if let bytes = sqlite3_column_blob(stmt, Int32(index)) {
+            let count = Int(sqlite3_column_bytes(stmt, Int32(index)))
+            return Data(bytes: bytes, count: count)
+        }
+        return nil
     }
     
     static func libVersionNumber() -> Int {

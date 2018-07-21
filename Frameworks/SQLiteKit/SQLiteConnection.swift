@@ -508,7 +508,7 @@ extension SQLiteConnection {
 
 fileprivate class ColumnInfo: SQLiteTable {
     
-    static func sqliteAttributes() -> [SQLiteAttribute] {
+    static func attributes() -> [SQLiteAttribute] {
         return []
     }
     

@@ -50,3 +50,15 @@ public struct Attribute: OptionSet {
     /// Member that defins when `ignore` will not create column
     public static let ignore = Attribute(rawValue: 1 << 6)
 }
+
+
+/// Select the collating sequence to use on a column. `binary` is the default.
+///
+/// - binary: The `BINARY` built-in SQL collation
+/// - nocase: The `NOCASE` built-in SQL collation
+/// - rtrim:  The `RTRIM` built-in SQL collation
+public enum CollationName: String {
+    case binary = "BINARY"
+    case nocase = "NOCASE"
+    case rtrim = "RTRIM"
+}

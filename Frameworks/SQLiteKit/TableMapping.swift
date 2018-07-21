@@ -37,7 +37,7 @@ public struct TableMapping {
     }
     
     public init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
-        let attributes = type.sqliteAttributes()
+        let attributes = type.attributes()
         
         if let nameAttribute = attributes.first(where: { $0.attribute == .tableName }) {
             tableName = nameAttribute.name

@@ -81,7 +81,7 @@ class User: SQLiteTable, CustomStringConvertible {
     
     var avatarData: Data?
     
-    static func sqliteAttributes() -> [SQLiteAttribute] {
+    static func attributes() -> [SQLiteAttribute] {
         return [
             SQLiteAttribute(name: "userID", attribute: .isPK),
             SQLiteAttribute(name: "userID", attribute: .autoInc)

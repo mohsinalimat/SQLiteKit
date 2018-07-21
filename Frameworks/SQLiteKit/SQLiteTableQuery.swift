@@ -90,7 +90,7 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         return q
     }
     
-    func clone<T: SQLiteTable>() -> SQLiteTableQuery<T> {
+    fileprivate func clone<T: SQLiteTable>() -> SQLiteTableQuery<T> {
         let query = SQLiteTableQuery<T>(connection: conn, table: table)
         query._limit = _limit
         query._offset = _offset
