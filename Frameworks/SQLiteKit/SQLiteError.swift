@@ -15,10 +15,12 @@ import Foundation
 /// - notNullConstraintViolation: Insert or Update not null column with null value.
 /// - prepareError: Prepare statement error.
 /// - jsonDecoderError: JSONDecoder error. Could not decode data read from database.
+/// - notSupportedError: SQLiteKit do not support
 public enum SQLiteError: Error {
     case openDataBaseError(String)
     case executeError(Int, String)
     case notNullConstraintViolation(Int, String)
     case prepareError(String)
     case jsonDecoderError(Error)
+    case notSupportedError(String)
 }

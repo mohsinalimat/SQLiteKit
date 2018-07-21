@@ -53,8 +53,8 @@ public struct TableMapping {
             cols.append(col)
         }
         columns = cols
-        insertColumns = columns.filter { return $0.isAutoInc == false }
-        insertOrReplaceColumns = columns
+        insertColumns = columns.filter { return $0.isAutoInc == false || !$0.ignored }
+        insertOrReplaceColumns = columns.filter { return !$0.ignored }
         
         for c in cols {
             if c.isPK && c.isAutoInc {
@@ -92,6 +92,8 @@ public struct TableMapping {
         
         public let isAutoInc: Bool
         
+        public let ignored: Bool
+        
         public let columnType: Any.Type
         
         init(propertyInfo: Mirror.Child, attributes: [SQLiteAttribute]) {
@@ -100,8 +102,9 @@ public struct TableMapping {
             value = propertyInfo.value
             isNullable = true
             let columnAttr = attributes.filter { $0.name == columnName }
-            isPK = columnAttr.first(where: { $0.attribute == Attribute.isPK }) != nil
-            isAutoInc = columnAttr.first(where: { $0.attribute == Attribute.autoInc }) != nil
+            isPK = columnAttr.contains(where: { $0.attribute == Attribute.isPK })
+            isAutoInc = columnAttr.contains(where: { $0.attribute == Attribute.autoInc })
+            ignored = columnAttr.contains(where: { $0.attribute == Attribute.ignore })
             columnType = type(of: propertyInfo.value)
         }
         

@@ -80,10 +80,12 @@ public class SQLiteConnection {
     fileprivate var _mappings: [String: TableMapping] = [:]
     fileprivate var _insertCommandMap: [String: PreparedSqliteInsertCommand] = [:]
     fileprivate var _transactionDepth: Int = 0
+    fileprivate var _transcationCounter: AtomicInteger = AtomicInteger()
     
     internal let handle: SQLiteDatabaseHandle
     
     /// Create a in-memory database
+    /// - Throws: throws exception
     public convenience init() throws {
         let databasePath = ":memory:"
         try self.init(databasePath: databasePath)
@@ -92,6 +94,7 @@ public class SQLiteConnection {
     /// Constructs a new SQLiteConnection and opens a SQLite database specified by databasePath.
     ///
     /// - Parameter databasePath: Specifies the path to the database file.
+    /// - Throws: throws exception
     public convenience init(databasePath: String) throws {
         try self.init(databasePath: databasePath, openFlags: [.readWrite, .create])
     }
@@ -101,6 +104,7 @@ public class SQLiteConnection {
     /// - Parameters:
     ///   - databasePath: Specifies the path to the database file.
     ///   - openFlags: Flags controlling how the connection should be opened.
+    /// - Throws: throws exception
     public init(databasePath: String, openFlags: OpenFlags) throws {
         self.dbPath = databasePath
         self.openFlags = openFlags
@@ -117,11 +121,17 @@ public class SQLiteConnection {
     deinit {
         SQLite3.close(handle)
     }
+    
+    /// Close the connection
+    public func close() {
+        SQLite3.close(handle)
+    }
 
     /// Executes a "drop table" on the database.  This is non-recoverable.
     ///
     /// - Parameter type: Type to reflect to a database table.
     /// - Returns: Whether the table was dropped
+    /// - Throws: throws exception
     @discardableResult
     public func dropTable<T: SQLiteTable>(_ type: T.Type) throws -> Int {
         let map = getMapping(of: type)
@@ -138,6 +148,7 @@ public class SQLiteConnection {
     ///   - type: Type to reflect to a database table
     ///   - createFlags: Optional flags allowing implicit PK and indexes based on naming conventions
     /// - Returns: Whether the table was created or migrated.
+    /// - Throws: throws exception
     @discardableResult
     public func createTable<T: SQLiteTable>(_ type: T.Type, createFlags: CreateFlags = .none) throws -> CreateTableResult {
         let map = getMapping(of: type, createFlags: createFlags)
@@ -188,6 +199,7 @@ public class SQLiteConnection {
     ///   - columnName: Name of the column to index
     ///   - unique: Whether the index should be unique
     /// - Returns: result of create index
+    /// - Throws: throws exception
     @discardableResult
     public func createIndex(_ indexName: String, tableName: String, columnName: String, unique: Bool = false) throws -> Int {
         return try createIndex(indexName, tableName: tableName, columnNames: [columnName], unique: unique)
@@ -201,6 +213,7 @@ public class SQLiteConnection {
     ///   - columnNames: Name of the columns to index
     ///   - unique: Whether the index should be unique
     /// - Returns: result of create index
+    /// - Throws: throws exception
     @discardableResult
     public func createIndex(_ indexName: String, tableName: String, columnNames: [String], unique: Bool = false) throws -> Int {
         let columns = columnNames.joined(separator: ",")
@@ -279,8 +292,28 @@ public class SQLiteConnection {
         
     }
     
-    public func rollback() {
+    public func rollback(to savePoint: String?) {
+        guard let savePoint = savePoint, savePoint.count > 0 else {
+            return
+        }
+        do {
+            // TODO
+            try execute("rollback")
+        } catch {
+            
+        }
         
+    }
+    
+    func saveTranscationPoint() -> String {
+        let depth = _transcationCounter.incrementAndGet() - 1
+        let ret = "S_" + UUID().uuidString + "_" + String(depth)
+        do {
+            try execute("savepoint \(ret)")
+        } catch {
+            print(error)
+        }
+        return ret
     }
     
     public func commitTranscation() {
@@ -371,16 +404,12 @@ public class SQLiteConnection {
     ///
     /// - Parameter obj: The object to update. It must have a primary key designated using the Attribute.isPK.
     /// - Returns: The number of rows updated.
-    @discardableResult
-    public func update(_ obj: SQLiteTable) -> Int {
-        return 0
-    }
-    
+    /// - Throws: throws exception
     @discardableResult
     public func update<T: SQLiteTable>(_ obj: T) throws -> Int {
         let map = getMapping(of: T.self)
         guard let pk = map.pk else {
-            return 0
+            throw SQLiteError.notSupportedError("Could not update table without primary key")
         }
         let cols = map.columns.filter { return $0.isPK == false }
         let sets = cols.map { return "\($0.name) = ?" }.joined(separator: ",")
@@ -396,11 +425,12 @@ public class SQLiteConnection {
     ///
     /// - Parameter obj: The object to delete. It must have a primary key designated using the Attribute.isPK.
     /// - Returns: The number of rows deleted.
+    /// - Throws: throws exception
     @discardableResult
     public func delete(_ obj: SQLiteTable) throws -> Int {
         let map = getMapping(of: obj.mapType)
         guard let pk = map.pk else {
-            return 0
+            throw SQLiteError.notSupportedError("Could not delete row without primary key")
         }
         let sql = "DELETE FROM \(map.tableName) WHERE \(pk.name) = ?"
         return try execute(sql, parameters: [pk.value])
@@ -411,6 +441,7 @@ public class SQLiteConnection {
     ///
     /// - Parameter type: Type to reflect to a database table.
     /// - Returns: Rows deleted
+    /// - Throws: throws exception
     @discardableResult
     public func deleteAll<T: SQLiteTable>(_ type: T.Type) throws -> Int {
         return try deleteAll(map: getMapping(of: T.self))
@@ -422,13 +453,20 @@ public class SQLiteConnection {
         return try execute(sql)
     }
     
-    public func close() {
-        
-    }
-    
-    public func executeScalar<T: SQLiteTable>(_ query: String, parameters: [Any] = []) -> T {
-        
-        return T()
+    /// Creates a SQLiteCommand given the command text (SQL) with arguments. Place a '?'
+    /// in the command text for each of the arguments and then executes that command.
+    /// Use this method when return primitive values.
+    /// You can set the Trace or TimeExecution properties of the connection to profile execution.
+    ///
+    /// - Parameters:
+    ///   - query: The fully escaped SQL.
+    ///   - parameters: Arguments to substitute for the occurences of '?' in the query.
+    /// - Returns: The number of rows modified in the database as a result of this execution.
+    /// - Throws: throws exception
+    public func executeScalar<T: SQLiteTable>(_ query: String, parameters: [Any] = []) throws -> T? {
+        let cmd = createCommand(query, parameters: parameters)
+        let t: T? = try cmd.executeScalar()
+        return t
     }
 }
 
