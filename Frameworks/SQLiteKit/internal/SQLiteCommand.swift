@@ -68,6 +68,10 @@ class SQLiteCommand {
                 SQLite3.bindText(stmt, index: index, value: v.absoluteString)
             } else if let v = value as? Data {
                 SQLite3.bindBlob(stmt, index: index, value: v)
+            } else if let v = value as? CGFloat {
+                SQLite3.bindDouble(stmt, index: index, value: Double(v))
+            } else if let v = value as? Float {
+                SQLite3.bindDouble(stmt, index: index, value: Double(v))
             }
         } else {
             SQLite3.bindNull(stmt, index: index)
@@ -114,10 +118,12 @@ class SQLiteCommand {
         guard let r = SQLite3.step(stmt) else {
             return nil
         }
-        SQLite3.finalize(stmt)
+        
         if r == SQLite3.Result.row || r == SQLite3.Result.done {
             let colType = SQLite3.columnType(stmt, index: 0)
-            return readColumn(stmt, index: 0, columnType: colType, type: T.self) as? T
+            let value = readColumn(stmt, index: 0, columnType: colType, type: T.self) as? T
+            SQLite3.finalize(stmt)
+            return value
         } else {
             let msg = SQLite3.getErrorMessage(conn.handle)
             throw SQLiteError.executeError(Int(r.rawValue), msg)

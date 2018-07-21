@@ -18,12 +18,16 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        // deleteDatabase()
+        //deleteDatabase()
+        
+        let number: CGFloat = 1.0
+        
+        print(type(of: number))
         
         db = try! SQLiteConnection(databasePath: dbPath)
         try! db.createTable(User.self)
         
-        //insertUsers()
+//        insertUsers()
         
         queryUser()
     }
@@ -79,7 +83,11 @@ class User: SQLiteTable, CustomStringConvertible {
     
     var birthday: Date
     
+    //var money: CGFloat
+    
     var avatarData: Data?
+    
+    //var school: School
     
     static func attributes() -> [SQLiteAttribute] {
         return [
@@ -92,10 +100,24 @@ class User: SQLiteTable, CustomStringConvertible {
         userID = 0
         name = ""
         age = 0
+        //money = 0
         birthday = Date()
+        //school = School(name: "TTT", rank: 0)
     }
     
     var description: String {
         return "userID: \(userID), name: \(name), age:\(age), birthday:\(birthday)"
+    }
+}
+
+class School: Codable {
+    
+    public let name: String
+    
+    public let rank: Int
+    
+    init(name: String, rank: Int) {
+        self.name = name
+        self.rank = rank
     }
 }

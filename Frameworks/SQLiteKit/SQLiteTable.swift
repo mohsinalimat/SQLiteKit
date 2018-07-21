@@ -27,6 +27,4 @@ extension SQLiteTable {
         let mirror = Mirror(reflecting: self)
         return mirror.subjectType as! SQLiteTable.Type
     }
-
 }
-
