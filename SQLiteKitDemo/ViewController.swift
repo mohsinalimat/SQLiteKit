@@ -36,13 +36,13 @@ class ViewController: UIViewController {
         let userQuery: SQLiteTableQuery<User> = db.table()
         let count = userQuery.count
         print("find users count:\(count)")
-        let users: [User] = db.table().list()
+        let users: [User] = userQuery.limit(3).toList()
         print(users)
         
-        let a: [User] = userQuery.filter(using: NSPredicate(format: "name = %@", "A"))
-        if a.count > 0 {
-            
-        }
+//        let a: [User] = userQuery.filter(using: NSPredicate(format: "name = %@", "A"))
+//        if a.count > 0 {
+//
+//        }
     }
     
     fileprivate func insertUsers() {
