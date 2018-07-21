@@ -103,20 +103,25 @@ class SQLiteCommand {
         return stmt
     }
     
-    func executeScalar<T>() -> T? {
+    func executeScalar<T>() throws -> T? {
         guard let stmt = prepare() else {
             return nil
         }
-        let r = SQLite3.step(stmt)
-        if r == SQLite3.Result.row {
+        guard let r = SQLite3.step(stmt) else {
+            return nil
+        }
+        SQLite3.finalize(stmt)
+        if r == SQLite3.Result.row || r == SQLite3.Result.done {
             let colType = SQLite3.columnType(stmt, index: 0)
             return readColumn(stmt, index: 0, columnType: colType, type: T.self) as? T
+        } else {
+            let msg = SQLite3.getErrorMessage(conn.handle)
+            throw SQLiteError.executeError(Int(r.rawValue), msg)
         }
-        return nil
     }
     
     @discardableResult
-    func executeNonQuery() -> Int {
+    func executeNonQuery() throws -> Int {
         guard let stmt = prepare() else {
             return 0
         }
@@ -129,8 +134,7 @@ class SQLiteCommand {
             return rowsAffected
         } else if r == SQLite3.Result.error {
             let msg = SQLite3.getErrorMessage(conn.handle)
-            let error = SQLiteError.excuteError(Int(r.rawValue), msg)
-            print(error)
+            throw SQLiteError.executeError(Int(r.rawValue), msg)
         }
     
         return 0
@@ -159,7 +163,6 @@ class SQLiteCommand {
         while SQLite3.step(stmt) == SQLite3.Result.row {
             // currently use JSONSerialization and JSONDecoder to ORM mapping
             var dict: [String: Any?] = [:]
-            // read cols
             for i in 0..<columnCount {
                 if let col = cols[i] {
                     let colType = SQLite3.columnType(stmt, index: i)
@@ -175,6 +178,7 @@ class SQLiteCommand {
                 print(error)
             }
         }
+        SQLite3.finalize(stmt)
         return result
     }
 }

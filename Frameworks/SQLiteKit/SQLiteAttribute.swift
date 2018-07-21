@@ -7,9 +7,17 @@
 
 import Foundation
 
+/// Specified column attributes with your codable model
+/// eg: Specifiy `Primary Key` with Attribute.isPK
+/// eg: Specifiy `AUTOINCREMENT Key` with Attribute.autoInc
 public struct SQLiteAttribute {
+    
+    /// Name of property
     public let name: String
+    
+    /// Attribute of property
     public let attribute: Attribute
+    
     public init(name: String, attribute: Attribute) {
         self.name = name
         self.attribute = attribute
@@ -25,13 +33,12 @@ public struct Attribute: OptionSet {
     
     public static let none = Attribute(rawValue: 1 << 0)
 
-    /// Column in primary key
+    /// Make property the primary key of table
     public static let isPK = Attribute(rawValue: 1 << 1)
     
-    /// Column auto increasement.
+    /// Make property AUTOINCREMENT, which can only have the type of `Int` or `Int64`
     public static let autoInc = Attribute(rawValue: 1 << 2)
 
-    /// Column value can not be null
     public static let nonull = Attribute(rawValue: 1 << 3)
     
     /// Create index

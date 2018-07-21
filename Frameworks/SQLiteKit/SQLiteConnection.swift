@@ -83,11 +83,17 @@ public class SQLiteConnection {
     
     internal let handle: SQLiteDatabaseHandle
     
+    /// Create a in-memory database
+    public convenience init() throws {
+        let databasePath = ":memory:"
+        try self.init(databasePath: databasePath)
+    }
+    
     /// Constructs a new SQLiteConnection and opens a SQLite database specified by databasePath.
     ///
     /// - Parameter databasePath: Specifies the path to the database file.
-    public convenience init(databasePath: String) {
-        self.init(databasePath: databasePath, openFlags: [.readWrite, .create])
+    public convenience init(databasePath: String) throws {
+        try self.init(databasePath: databasePath, openFlags: [.readWrite, .create])
     }
     
     /// Constructs a new SQLiteConnection and opens a SQLite database specified by databasePath.
@@ -95,12 +101,15 @@ public class SQLiteConnection {
     /// - Parameters:
     ///   - databasePath: Specifies the path to the database file.
     ///   - openFlags: Flags controlling how the connection should be opened.
-    public init(databasePath: String, openFlags: OpenFlags) {
+    public init(databasePath: String, openFlags: OpenFlags) throws {
         self.dbPath = databasePath
         self.openFlags = openFlags
         self.libVersionNumber = SQLite3.libVersionNumber()
         var dbHandle: SQLiteDatabaseHandle?
-        let _ = SQLite3.open(filename: dbPath, db: &dbHandle, flags: openFlags)
+        let r = SQLite3.open(filename: dbPath, db: &dbHandle, flags: openFlags)
+        if r != SQLite3.Result.ok {
+            throw SQLiteError.openDataBaseError("Could not open database file at path: \(databasePath), result code: \(r?.rawValue ?? 0)")
+        }
         handle = dbHandle!
         _open = true
     }
@@ -114,10 +123,10 @@ public class SQLiteConnection {
     /// - Parameter type: Type to reflect to a database table.
     /// - Returns: Whether the table was dropped
     @discardableResult
-    public func dropTable<T: SQLiteTable>(_ type: T.Type) -> Int {
+    public func dropTable<T: SQLiteTable>(_ type: T.Type) throws -> Int {
         let map = getMapping(of: type)
         let sql = "drop table if exists \(map.tableName)"
-        return execute(sql)
+        return try execute(sql)
     }
     
     /// Executes a "create table if not exists" on the database. It also
@@ -130,7 +139,7 @@ public class SQLiteConnection {
     ///   - createFlags: Optional flags allowing implicit PK and indexes based on naming conventions
     /// - Returns: Whether the table was created or migrated.
     @discardableResult
-    public func createTable<T: SQLiteTable>(_ type: T.Type, createFlags: CreateFlags = .none) -> CreateTableResult {
+    public func createTable<T: SQLiteTable>(_ type: T.Type, createFlags: CreateFlags = .none) throws -> CreateTableResult {
         let map = getMapping(of: type, createFlags: createFlags)
         if map.columns.count == 0 {
             return CreateTableResult.noneColumnsFound
@@ -158,11 +167,11 @@ public class SQLiteConnection {
             if map.withoutRowId {
                 sql += " WITHOUT ROWID"
             }
-            execute(sql)
+            try execute(sql)
             result = .created
         } else {
             // do the migration
-            migrateTable(map, existingCols: existingCols)
+            try migrateTable(map, existingCols: existingCols)
             result = .migrated
         }
         // TODO: - create index
@@ -180,8 +189,8 @@ public class SQLiteConnection {
     ///   - unique: Whether the index should be unique
     /// - Returns: result of create index
     @discardableResult
-    public func createIndex(_ indexName: String, tableName: String, columnName: String, unique: Bool = false) -> Int {
-        return createIndex(indexName, tableName: tableName, columnNames: [columnName], unique: unique)
+    public func createIndex(_ indexName: String, tableName: String, columnName: String, unique: Bool = false) throws -> Int {
+        return try createIndex(indexName, tableName: tableName, columnNames: [columnName], unique: unique)
     }
     
     /// Creates an index for the specified table and columns.
@@ -193,11 +202,11 @@ public class SQLiteConnection {
     ///   - unique: Whether the index should be unique
     /// - Returns: result of create index
     @discardableResult
-    public func createIndex(_ indexName: String, tableName: String, columnNames: [String], unique: Bool = false) -> Int {
+    public func createIndex(_ indexName: String, tableName: String, columnNames: [String], unique: Bool = false) throws -> Int {
         let columns = columnNames.joined(separator: ",")
         let u = unique ? "UNIQUE": ""
         let sql = String(format: "CREATE %@ INDEX IF NOT EXISTS %@ ON %@(%@)", columns, indexName, u, tableName)
-        return execute(sql)
+        return try execute(sql)
     }
     
     /// Creates a SQLiteCommand given the command text (SQL) with arguments. Place a '?'
@@ -210,10 +219,9 @@ public class SQLiteConnection {
     ///   - parameters: Arguments to substitute for the occurences of '?' in the query.
     /// - Returns: The number of rows modified in the database as a result of this execution.
     @discardableResult
-    public func execute(_ query: String, parameters: [Any] = []) -> Int {
+    public func execute(_ query: String, parameters: [Any] = []) throws -> Int {
         let cmd = createCommand(query, parameters: parameters)
-        let r = cmd.executeNonQuery()
-        return r
+        return try cmd.executeNonQuery()
     }
     
     // MARK: - Query
@@ -369,18 +377,17 @@ public class SQLiteConnection {
     }
     
     @discardableResult
-    public func update<T: SQLiteTable>(_ obj: T) -> Int {
+    public func update<T: SQLiteTable>(_ obj: T) throws -> Int {
         let map = getMapping(of: T.self)
         guard let pk = map.pk else {
             return 0
         }
-        //let pk = map.pk
         let cols = map.columns.filter { return $0.isPK == false }
         let sets = cols.map { return "\($0.name) = ?" }.joined(separator: ",")
         var values: [Any] = cols.map { return $0.getValue(of: obj) }
         values.append(pk.getValue(of: obj))
         let sql = String(format: "UPDATE %@ SET %@ WHERE %@ = ?", map.tableName, sets, pk.name)
-        return execute(sql, parameters: values)
+        return try execute(sql, parameters: values)
     }
     
     // MARK: - Delete
@@ -390,13 +397,13 @@ public class SQLiteConnection {
     /// - Parameter obj: The object to delete. It must have a primary key designated using the Attribute.isPK.
     /// - Returns: The number of rows deleted.
     @discardableResult
-    public func delete(_ obj: SQLiteTable) -> Int {
+    public func delete(_ obj: SQLiteTable) throws -> Int {
         let map = getMapping(of: obj.mapType)
         guard let pk = map.pk else {
             return 0
         }
         let sql = "DELETE FROM \(map.tableName) WHERE \(pk.name) = ?"
-        return execute(sql, parameters: [pk.value])
+        return try execute(sql, parameters: [pk.value])
     }
     
     
@@ -405,15 +412,14 @@ public class SQLiteConnection {
     /// - Parameter type: Type to reflect to a database table.
     /// - Returns: Rows deleted
     @discardableResult
-    public func deleteAll<T: SQLiteTable>(_ type: T.Type) -> Int {
-        let map = getMapping(of: T.self)
-        return deleteAll(map: map)
+    public func deleteAll<T: SQLiteTable>(_ type: T.Type) throws -> Int {
+        return try deleteAll(map: getMapping(of: T.self))
     }
     
     @discardableResult
-    fileprivate func deleteAll(map: TableMapping) -> Int {
+    fileprivate func deleteAll(map: TableMapping) throws -> Int {
         let sql = "DELETE FROM \(map.tableName)"
-        return execute(sql)
+        return try execute(sql)
     }
     
     public func close() {
@@ -447,7 +453,7 @@ extension SQLiteConnection {
         return map
     }
     
-    fileprivate func migrateTable(_ map: TableMapping, existingCols: [ColumnInfo]) {
+    fileprivate func migrateTable(_ map: TableMapping, existingCols: [ColumnInfo]) throws {
         var newCols: [TableMapping.Column] = []
         for column in map.columns {
             if let _ = existingCols.first(where: { $0.name == column.name }) {
@@ -457,7 +463,7 @@ extension SQLiteConnection {
         }
         for p in newCols {
             let sql = "ALTER TABLE \(map.tableName) ADD COLUMN \(SQLiteORM.sqlDeclaration(of: p))"
-            execute(sql)
+            try execute(sql)
         }
     }
     

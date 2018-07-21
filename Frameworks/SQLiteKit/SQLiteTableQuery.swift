@@ -23,8 +23,13 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     
     /// Execute SELECT COUNT(*) FROM `Table`
     public var count: Int {
-        let c: Int = generateCommand("COUNT(*)").executeScalar() ?? 0
-        return c
+        do {
+            let c: Int = try generateCommand("COUNT(*)").executeScalar() ?? 0
+            return c
+        } catch {
+            print(error)
+        }
+        return 0
     }
     
     private func generateCommand(_ selection: String) -> SQLiteCommand {

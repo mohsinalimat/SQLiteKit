@@ -20,8 +20,8 @@ class ViewController: UIViewController {
         
         // deleteDatabase()
         
-        db = SQLiteConnection(databasePath: dbPath)
-        db.createTable(User.self)
+        db = try! SQLiteConnection(databasePath: dbPath)
+        try! db.createTable(User.self)
         
         //insertUsers()
         
