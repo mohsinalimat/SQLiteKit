@@ -55,6 +55,11 @@ public class SQLiteConnection {
         public static let protectionNone = OpenFlags(rawValue: 0x00400000)
     }
     
+    /// Result of create table
+    ///
+    /// - created: Table is successfully created
+    /// - migrated: Table is migrated. New columns are added.
+    /// - noneColumnsFound: Table have no columns.
     public enum CreateTableResult {
         case created
         case migrated
@@ -74,6 +79,7 @@ public class SQLiteConnection {
     fileprivate let openFlags: OpenFlags
     fileprivate var _mappings: [String: TableMapping] = [:]
     fileprivate var _insertCommandMap: [String: PreparedSqliteInsertCommand] = [:]
+    fileprivate var _transactionDepth: Int = 0
     
     internal let handle: SQLiteDatabaseHandle
     
@@ -217,11 +223,15 @@ public class SQLiteConnection {
         return cmd.executeQuery()
     }
     
+    
+    /// Find objects using primary key value
+    ///
+    /// - Parameter pk: Value of table primary key
+    /// - Returns: Object that match the primary. `nil` will return if not found.
     public func find<T: SQLiteTable>(_ pk: Any) -> T? {
         let map = getMapping(of: T.self)
         return query(map.queryByPrimaryKeySQL, parameters: [pk]).first
     }
-    
     
     /// Attempts to retrieve the first object that matches the query from the table associated with the specified type.
     ///
@@ -252,6 +262,10 @@ public class SQLiteConnection {
     }
     
     // MARK: - Transcation
+    
+    public var isInTranscation: Bool {
+        return _transactionDepth > 0
+    }
     
     public func beginTranscation() {
         

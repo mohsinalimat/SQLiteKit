@@ -1,10 +1,7 @@
 
 # SQLiteKit
 
-a Swift version inspired by [SQLite-net](https://github.com/praeclarum/sqlite-net/).
-
-Using Codable and Mirror technology.
-
+a Swift version of SQLite library inspired by [SQLite-net](https://github.com/praeclarum/sqlite-net/) using Codable and Mirror technology.
 
 ## Features
 
@@ -16,6 +13,7 @@ Using Codable and Mirror technology.
 * Auto increase primary key value is not set when insert into table
 * Transcation
 * Create Index on table
+* Custom Attributes on table
 * ...
 
 ## Requirements
@@ -82,7 +80,7 @@ SQLiteTable support following native Swift Types.
 | `Data`          | `BLOB`      |
 | `Optional<T>`   | `T`         |
 
-T should beo one of  `Int`, `Float`, `Double`, `String`, `Date` or `Data`。
+T should be one of  `Int`, `Float`, `Double`, `String`, `Date` or `Data`。
 
 ## Query
 
