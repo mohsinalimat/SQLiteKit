@@ -20,31 +20,39 @@ public enum Ordering {
     }
 }
 
-public struct TableMapping {
+enum SQLiteDataType: String {
+    case INTEGER
+    case REAL
+    case TEXT
+    case BLOB
+    case NULL
+}
+
+struct TableMapping {
     
-    public let tableName: String
+    let tableName: String
     
-    public let createFlags: SQLiteConnection.CreateFlags
+    let createFlags: SQLiteConnection.CreateFlags
     
-    public let columns: [Column]
+    let columns: [Column]
     
-    public private(set) var insertColumns: [Column]
+    private(set) var insertColumns: [Column]
     
-    public private(set) var insertOrReplaceColumns: [Column]
+    private(set) var insertOrReplaceColumns: [Column]
     
-    public let queryByPrimaryKeySQL: String
+    let queryByPrimaryKeySQL: String
     
-    public var pk: Column?
+    var pk: Column?
     
-    public var autoIncPK: Column?
+    var autoIncPK: Column?
     
-    public var withoutRowId: Bool = false
+    var withoutRowId: Bool = false
     
-    public var hasAutoIncPK: Bool {
+    var hasAutoIncPK: Bool {
         return autoIncPK != nil
     }
     
-    public init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
+    init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
         let attributes = type.attributes()
         
         if let nameAttribute = attributes.first(where: { $0.attribute == .tableName }) {
@@ -91,21 +99,21 @@ public struct TableMapping {
         // TODO: - Use reflection to set primary key value
     }
     
-    public class Column {
+    class Column {
         
-        public let name: String
+        let name: String
         
-        public let value: Any
+        let value: Any
         
-        public let isNullable: Bool
+        let isNullable: Bool
         
-        public let isPK: Bool
+        let isPK: Bool
         
-        public let isAutoInc: Bool
+        let isAutoInc: Bool
         
-        public let ignored: Bool
+        let ignored: Bool
         
-        public let columnType: Any.Type
+        let columnType: Any.Type
         
         init(propertyInfo: Mirror.Child, attributes: [SQLiteAttribute]) {
             let columnName = propertyInfo.label!
@@ -140,7 +148,7 @@ extension TableMapping.Column {
         if isPK {
             decl += "PRIMARY KEY "
         }
-        if isAutoInc {
+        if isAutoInc && SQLType == SQLiteDataType.INTEGER.rawValue {
             decl += "AUTOINCREMENT "
         }
         if !isNullable {
@@ -153,10 +161,12 @@ extension TableMapping.Column {
         let mappings: [String: [Any.Type]] = [
             "INTEGER": [
                 Int.self, Int?.self,
+                Int64.self, Int64?.self,
                 Bool.self, Bool?.self
             ],
             "REAL": [
                 Float.self, Float?.self,
+                Double.self, Double?.self,
                 Date.self, Date?.self
             ],
             "TEXT": [

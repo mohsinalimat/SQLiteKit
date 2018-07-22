@@ -68,6 +68,7 @@ class SQLite3 {
         return Result(rawValue: sqlite3_close_v2(handle))
     }
     
+    @discardableResult
     static func busyTimeout(_ db: SQLiteDatabaseHandle, milliseconds: Int) -> Result? {
         return Result(rawValue: sqlite3_busy_timeout(db, Int32(milliseconds)))
     }

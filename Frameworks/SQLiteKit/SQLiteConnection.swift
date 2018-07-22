@@ -84,6 +84,13 @@ public class SQLiteConnection {
     
     internal let handle: SQLiteDatabaseHandle
     
+    /// Sets a busy handler to sleep the specified amount of time when a table is locked.
+    public var busyTimeout: Int = 200 {
+        didSet {
+            SQLite3.busyTimeout(handle, milliseconds: busyTimeout)
+        }
+    }
+    
     /// Create a in-memory database
     /// - Throws: throws exception
     public convenience init() throws {

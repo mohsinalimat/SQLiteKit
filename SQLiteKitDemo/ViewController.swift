@@ -20,11 +20,10 @@ class ViewController: UIViewController {
         
         //deleteDatabase()
         
-        let number: CGFloat = 1.0
+        let value = 1 >> 5
+        print(value)
         
-        print(type(of: number))
-        
-        db = try! SQLiteConnection(databasePath: dbPath)
+//        db = try! SQLiteConnection(databasePath: dbPath)
         //try! db.createTable(User.self)
         
 //        insertUsers()

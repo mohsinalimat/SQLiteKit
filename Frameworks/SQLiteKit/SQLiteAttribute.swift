@@ -36,7 +36,8 @@ public struct Attribute: OptionSet {
     /// Make property the primary key of table
     public static let isPK = Attribute(rawValue: 1 << 1)
     
-    /// Make property AUTOINCREMENT, which can only have the type of `Int` or `Int64`
+    /// Make property AUTOINCREMENT
+    /// NOTE: Only support `Int` or `Int64`
     public static let autoInc = Attribute(rawValue: 1 << 2)
 
     public static let nonull = Attribute(rawValue: 1 << 3)

@@ -7,6 +7,17 @@
 
 import Foundation
 
-extension SQLiteConnection {
+public class SQLiteConnectionAsync {
     
+    public func createTableAsync() {
+        
+    }
+    
+    public func insertAsync<T: SQLiteTable>(_ obj: T) {
+        
+    }
+    
+    public func insertOrReplaceAsync() {
+        
+    }
 }

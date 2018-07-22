@@ -7,7 +7,7 @@
 
 import Foundation
 
-/// A query
+/// A query interface of table
 public class SQLiteTableQuery<T: SQLiteTable> {
     
     private let conn: SQLiteConnection
@@ -16,7 +16,7 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     private var _offset: Int?
     private var _orderBys: [Ordering]?
     
-    public init(connection: SQLiteConnection, table: TableMapping) {
+    init(connection: SQLiteConnection, table: TableMapping) {
         self.conn = connection
         self.table = table
     }
