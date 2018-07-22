@@ -40,7 +40,7 @@ class SQLiteCommand {
         bind(nil, value: value)
     }
     
-    func bindAll(_ stmt: SQLiteStatement) {
+    func bindAll(_ stmt: SQLiteStatement) throws {
         var index = 1
         for var bind in _bindings {
             if let name = bind.name {
@@ -49,59 +49,60 @@ class SQLiteCommand {
                 index += 1
                 bind.index = index
             }
-            SQLiteCommand.bindParameter(stmt, index: index, value: bind.value)
+            try SQLiteCommand.bindParameter(stmt, index: index, value: bind.value)
         }
     }
     
-    static func bindParameter(_ stmt: SQLiteStatement, index: Int, value: Any?) {
+    @discardableResult
+    static func bindParameter(_ stmt: SQLiteStatement, index: Int, value: Any?) throws -> Int {
+        let code: Int
         if let value = value {
-            if let v = value as? String {
-                SQLite3.bindText(stmt, index: index, value: v)
-            } else if let v = value as? Bool {
-                SQLite3.bindInt(stmt, index: index, value: v ? 1 : 0)
-            } else if let v = value as? Int {
-                SQLite3.bindInt(stmt, index: index, value: v)
-            } else if let v = value as? Date {
+            switch value {
+            case let v as String:
+                code = SQLite3.bindText(stmt, index: index, value: v)
+            case let v as Bool:
+                code = SQLite3.bindInt(stmt, index: index, value: v ? 1 : 0)
+            case let v as Int:
+                code = SQLite3.bindInt(stmt, index: index, value: v)
+            case let v as Float:
+                code = SQLite3.bindDouble(stmt, index: index, value: Double(v))
+            case let v as Double:
+                code = SQLite3.bindDouble(stmt, index: index, value: v)
+            case let v as CGFloat:
+                code = SQLite3.bindDouble(stmt, index: index, value: Double(v))
+            case let v as Date:
                 let interval = v.timeIntervalSince1970
-                SQLite3.bindDouble(stmt, index: index, value: interval)
-            } else if let v = value as? URL {
-                SQLite3.bindText(stmt, index: index, value: v.absoluteString)
-            } else if let v = value as? Data {
-                SQLite3.bindBlob(stmt, index: index, value: v)
-            } else if let v = value as? CGFloat {
-                SQLite3.bindDouble(stmt, index: index, value: Double(v))
-            } else if let v = value as? Float {
-                SQLite3.bindDouble(stmt, index: index, value: Double(v))
+                code = SQLite3.bindDouble(stmt, index: index, value: interval)
+            case let v as URL:
+                code = SQLite3.bindText(stmt, index: index, value: v.absoluteString)
+            case let v as Data:
+                code = SQLite3.bindBlob(stmt, index: index, value: v)
+            default:
+                throw SQLiteError.notSupportedError("Unsupported parameter type")
             }
         } else {
-            SQLite3.bindNull(stmt, index: index)
+            code = SQLite3.bindNull(stmt, index: index)
         }
+        return code
     }
     
     func readColumn(_ stmt: SQLiteStatement, index: Int, columnType: SQLite3.ColumnType, type: Any.Type) -> Any? {
-        if columnType == .Null {
+        switch columnType {
+        case .Text:
+            return SQLite3.columnText(stmt, index: index)
+        case .Integer:
+            let value = SQLite3.columnInt(stmt, index: index)
+            if type is Bool.Type {
+                return value == 1
+            }
+            return value
+        case .Float:
+            return SQLite3.columnDouble(stmt, index: index)
+        case .Blob:
+            return SQLite3.columnBlob(stmt, index: index)
+        case .Null:
             return nil
         }
-        // TODO
-        if type is String.Type {
-            return SQLite3.columnText(stmt, index: index)
-        } else if type is Int.Type {
-            return SQLite3.columnInt(stmt, index: index)
-        } else if type is Bool.Type {
-            return SQLite3.columnInt(stmt, index: index) == 1
-        } else if type is Float.Type || type is Double.Type {
-            return SQLite3.columnDouble(stmt, index: index)
-        } else if type is Date.Type {
-            //let date = Date(timeIntervalSince1970: interval)
-            //return dateFormatter.string(from: date)
-            let interval = SQLite3.columnDouble(stmt, index: index)
-            return interval
-        } else if type is URL.Type {
-            return SQLite3.columnText(stmt, index: index)
-        } else if type is Data.Type {
-            return SQLite3.columnBlob(stmt, index: index)
-        }
-        return nil
     }
     
     func prepare() throws -> SQLiteStatement {
@@ -109,7 +110,7 @@ class SQLiteCommand {
             let msg = SQLite3.getErrorMessage(conn.handle)
             throw SQLiteError.prepareError(msg)
         }
-        bindAll(stmt)
+        try bindAll(stmt)
         return stmt
     }
     
@@ -213,12 +214,12 @@ class PreparedSqliteInsertCommand {
         }
     }
     
-    func executeNonQuery(_ args: [Any]) -> Int {
+    func executeNonQuery(_ args: [Any]) throws -> Int {
         guard let stmt = SQLite3.prepare(conn.handle, SQL: commandText) else {
             return 0
         }
         for (index, arg) in args.enumerated() {
-            SQLiteCommand.bindParameter(stmt, index: index + 1, value: arg)
+            try SQLiteCommand.bindParameter(stmt, index: index + 1, value: arg)
         }
         let r = SQLite3.step(stmt)
         if r == SQLite3.Result.done {

@@ -332,8 +332,8 @@ public class SQLiteConnection {
     /// - Parameter obj: The object to insert.
     /// - Returns: The number of rows added to the table.
     @discardableResult
-    public func insert(_ obj: SQLiteTable?) -> Int {
-        return insert(obj, extra: "")
+    public func insert(_ obj: SQLiteTable?) throws -> Int {
+        return try insert(obj, extra: "")
     }
     
     
@@ -344,8 +344,8 @@ public class SQLiteConnection {
     /// - Parameter obj: The object to insert.
     /// - Returns: The number of rows modified.
     @discardableResult
-    public func insertOrReplace(_ obj: SQLiteTable?) -> Int {
-        return insert(obj, extra: "OR REPLACE")
+    public func insertOrReplace(_ obj: SQLiteTable?) throws -> Int {
+        return try insert(obj, extra: "OR REPLACE")
     }
     
     
@@ -358,7 +358,7 @@ public class SQLiteConnection {
     ///   - extra: Literal SQL code that gets placed into the command. INSERT {extra} INTO ...
     /// - Returns: The number of rows added to the table.
     @discardableResult
-    public func insert(_ obj: SQLiteTable?, extra: String) -> Int {
+    public func insert(_ obj: SQLiteTable?, extra: String) throws -> Int {
         guard let object = obj else {
             return 0
         }
@@ -368,7 +368,7 @@ public class SQLiteConnection {
         
         let values: [Any] = columns.map { return $0.getValue(of: object) }
         let cmd = getInsertCommand(map: map, extra: extra)
-        let rows = cmd.executeNonQuery(values)
+        let rows = try cmd.executeNonQuery(values)
         if map.hasAutoIncPK {
             let id = SQLite3.lastInsertRowid(handle)
             map.setAutoIncPK(id)
@@ -384,13 +384,13 @@ public class SQLiteConnection {
     ///   - inTranscation: A boolean indicating if the inserts should be wrapped in a transaction.
     /// - Returns: The number of rows added to the table.
     @discardableResult
-    public func insertAll(_ objects: [SQLiteTable], inTranscation: Bool = false) -> Int {
+    public func insertAll(_ objects: [SQLiteTable], inTranscation: Bool = false) throws -> Int {
         var result = 0
         if inTranscation {
             
         } else {
             for obj in objects {
-                result += insert(obj)
+                result += try insert(obj)
             }
         }
         return result

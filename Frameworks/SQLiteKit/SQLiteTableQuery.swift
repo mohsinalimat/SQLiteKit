@@ -35,6 +35,10 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     private func generateCommand(_ selection: String) -> SQLiteCommand {
         var cmdText = "SELECT \(selection) FROM \(table.tableName)"
         
+        if let orderBy = _orderBys, orderBy.count > 0 {
+            let sql = orderBy.map { return $0.declaration }.joined(separator: ",")
+            cmdText += " ORDER BY " + sql
+        }
         if let limit = _limit {
            cmdText += " LIMIT \(limit)"
         }
@@ -90,10 +94,16 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         return q
     }
     
+    public func distinct(_ columns: String...) -> SQLiteTableQuery<T> {
+        let q: SQLiteTableQuery<T> = clone()
+        return q
+    }
+    
     fileprivate func clone<T: SQLiteTable>() -> SQLiteTableQuery<T> {
         let query = SQLiteTableQuery<T>(connection: conn, table: table)
         query._limit = _limit
         query._offset = _offset
+        query._orderBys = _orderBys
         return query
     }
 }

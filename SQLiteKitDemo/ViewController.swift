@@ -25,11 +25,11 @@ class ViewController: UIViewController {
         print(type(of: number))
         
         db = try! SQLiteConnection(databasePath: dbPath)
-        try! db.createTable(User.self)
+        //try! db.createTable(User.self)
         
 //        insertUsers()
         
-        queryUser()
+        //queryUser()
     }
     
     fileprivate func deleteDatabase() {
@@ -61,7 +61,7 @@ class ViewController: UIViewController {
             let user = User()
             user.name = item.0
             user.age = item.1
-            db.insert(user)
+            try! db.insert(user)
         }
         
     }

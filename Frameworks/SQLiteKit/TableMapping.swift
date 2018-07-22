@@ -7,9 +7,17 @@
 
 import Foundation
 
-public struct Ordering {
-    public let name: String
-    public let ascending: Bool
+public enum Ordering {
+    case ASC(String)
+    case DESC(String)
+    var declaration: String {
+        switch self {
+        case .ASC(let name):
+            return "\(name) ASC"
+        case .DESC(let name):
+            return "\(name) DESC"
+        }
+    }
 }
 
 public struct TableMapping {
@@ -128,7 +136,7 @@ public struct TableMapping {
 extension TableMapping.Column {
     
     var declaration: String {
-        var decl = "'\(name)' \(sqlType) "
+        var decl = "'\(name)' \(SQLType) "
         if isPK {
             decl += "PRIMARY KEY "
         }
@@ -141,7 +149,7 @@ extension TableMapping.Column {
         return decl
     }
     
-    var sqlType: String {
+    fileprivate var SQLType: String {
         let mappings: [String: [Any.Type]] = [
             "INTEGER": [
                 Int.self, Int?.self,
