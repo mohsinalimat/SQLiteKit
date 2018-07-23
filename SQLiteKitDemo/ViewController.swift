@@ -20,15 +20,13 @@ class ViewController: UIViewController {
         
         //deleteDatabase()
         
-        let value = 1 >> 5
-        print(value)
+        db = try! SQLiteConnection(databasePath: dbPath)
         
-//        db = try! SQLiteConnection(databasePath: dbPath)
         //try! db.createTable(User.self)
         
 //        insertUsers()
         
-        //queryUser()
+        queryUser()
     }
     
     fileprivate func deleteDatabase() {
@@ -39,13 +37,22 @@ class ViewController: UIViewController {
         let userQuery: SQLiteTableQuery<User> = db.table()
         let count = userQuery.count
         print("find users count:\(count)")
-        let users: [User] = userQuery.limit(3).toList()
+        var users: [User] = userQuery.limit(3).toList()
         print(users)
         
 //        let a: [User] = userQuery.filter(using: NSPredicate(format: "name = %@", "A"))
 //        if a.count > 0 {
 //
 //        }
+        
+//        let u = User()
+//        u.userID = 2
+//        u.name = "222"
+        
+        //try! db.upsert(u)
+        
+//        users = userQuery.limit(3).toList()
+//        print(users)
     }
     
     fileprivate func insertUsers() {

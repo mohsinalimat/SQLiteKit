@@ -186,4 +186,8 @@ class SQLite3 {
     static func libVersionNumber() -> Int {
         return Int(sqlite3_libversion_number())
     }
+    
+    static func libVersion() -> String {
+        return String(cString: sqlite3_libversion())
+    }
 }
