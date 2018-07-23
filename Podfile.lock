@@ -1,5 +1,5 @@
 PODS:
-  - SQLiteKit (0.0.12)
+  - SQLiteKit (0.0.13)
 
 DEPENDENCIES:
   - SQLiteKit (from `Frameworks/SQLiteKit`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: Frameworks/SQLiteKit
 
 SPEC CHECKSUMS:
-  SQLiteKit: 9d7c9669843489054c5ac413d596a84ec4067b30
+  SQLiteKit: 85b6981d192d6e972f02a745ee76ce7b00612855
 
 PODFILE CHECKSUM: 2e00a54686f94f1424ddc2509c28708d3c7e3fb2
 

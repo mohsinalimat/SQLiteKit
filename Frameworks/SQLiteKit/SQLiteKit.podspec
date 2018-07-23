@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = 'SQLiteKit'
-  s.version      = '0.0.12'
+  s.version      = '0.0.13'
   s.license = 'MIT'
   s.requires_arc = true
   s.source = { :git => 'https://github.com/alexiscn/SQLiteKit.git', :tag => s.version.to_s }
