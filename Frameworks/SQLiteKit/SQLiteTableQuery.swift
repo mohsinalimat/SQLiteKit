@@ -14,7 +14,7 @@ public class SQLiteTableQuery<T: SQLiteTable> {
     private let table: TableMapping
     private var _limit: Int?
     private var _offset: Int?
-    private var _orderBys: [Ordering]?
+    private var _orderBys: [SQLiteConnection.Ordering]?
     
     init(connection: SQLiteConnection, table: TableMapping) {
         self.conn = connection
@@ -59,14 +59,6 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         return generateCommand("*").executeQuery()
     }
     
-    public func filter<T: SQLiteTable>(_ isIncluded: (T) -> Bool) -> [T] {
-        return []
-    }
-    
-    public func filter(_ isIncluded: Bool) {
-        
-    }
-    
     /// Filter using NSPredicate.
     /// NOTE: Key used in predicate must be one of properties name within your table model.
     ///
@@ -78,6 +70,11 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         return conn.createCommand(cmdText, parameters: []).executeQuery()
     }
     
+    
+    /// Yields a given number of elements from the query and then skips the remainder.
+    ///
+    /// - Parameter limit: Limit number that your want to select.
+    /// - Returns: SQLiteTableQuery
     public func limit<T: SQLiteTable>(_ limit: Int) -> SQLiteTableQuery<T> {
         let q: SQLiteTableQuery<T> = clone()
         q._limit = limit
@@ -89,7 +86,12 @@ public class SQLiteTableQuery<T: SQLiteTable> {
         return q
     }
     
-    public func orderBy(_ order: Ordering) -> SQLiteTableQuery<T> {
+    
+    /// Order the query results according to a key.
+    ///
+    /// - Parameter order: order
+    /// - Returns: SQLiteTableQuery
+    public func orderBy(_ order: SQLiteConnection.Ordering) -> SQLiteTableQuery<T> {
         let q: SQLiteTableQuery<T> = clone()
         return q
     }

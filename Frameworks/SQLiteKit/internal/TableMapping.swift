@@ -7,18 +7,7 @@
 
 import Foundation
 
-public enum Ordering {
-    case ASC(String)
-    case DESC(String)
-    var declaration: String {
-        switch self {
-        case .ASC(let name):
-            return "\(name) ASC"
-        case .DESC(let name):
-            return "\(name) DESC"
-        }
-    }
-}
+
 
 enum SQLiteDataType: String {
     case INTEGER
@@ -113,6 +102,8 @@ struct TableMapping {
         
         let ignored: Bool
         
+        let isIndexed: Bool
+        
         let columnType: Any.Type
         
         init(propertyInfo: Mirror.Child, attributes: [SQLiteAttribute]) {
@@ -124,6 +115,7 @@ struct TableMapping {
             isPK = columnAttr.contains(where: { $0.attribute == Attribute.isPK })
             isAutoInc = columnAttr.contains(where: { $0.attribute == Attribute.autoInc })
             ignored = columnAttr.contains(where: { $0.attribute == Attribute.ignore })
+            isIndexed = columnAttr.contains(where: { $0.attribute == Attribute.indexed })
             columnType = type(of: propertyInfo.value)
         }
         

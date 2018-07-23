@@ -16,6 +16,19 @@ public class SQLiteConnection {
         case URL(URL)
     }
     
+    public enum Ordering {
+        case ASC(String)
+        case DESC(String)
+        var declaration: String {
+            switch self {
+            case .ASC(let name):
+                return "\(name) ASC"
+            case .DESC(let name):
+                return "\(name) DESC"
+            }
+        }
+    }
+    
     /// Flags to create a SQLite database
     ///
     /// - none: Use the default creation options
@@ -25,6 +38,7 @@ public class SQLiteConnection {
     /// - autoIncPK: Force the primary key property to be auto incrementing. This avoids the need for the [AutoIncrement] attribute. The primary key property on the class should have type int or long.
     /// - fullTextSearch3: Create virtual table using FTS3
     /// - fullTextSearch4: Create virtual table using FTS4
+    /// - fullTextSearch5: Create virtual table using FTS5
     public enum CreateFlags: Int {
         case none = 0x000
         case implicitPK = 0x001
@@ -33,6 +47,7 @@ public class SQLiteConnection {
         case autoIncPK = 0x004
         case fullTextSearch3 = 0x100
         case fullTextSearch4 = 0x200
+        case fullTextSearch5 = 0x300
     }
     
     public struct OpenFlags: OptionSet {
@@ -192,7 +207,13 @@ public class SQLiteConnection {
             try migrateTable(map, existingCols: existingCols)
             result = .migrated
         }
-        // TODO: - create index
+        // create index
+        for column in map.columns {
+            if column.isIndexed {
+                
+            }
+        }
+        
         return result
     }
     
@@ -226,6 +247,11 @@ public class SQLiteConnection {
         let columns = columnNames.joined(separator: ",")
         let u = unique ? "UNIQUE": ""
         let sql = String(format: "CREATE %@ INDEX IF NOT EXISTS %@ ON %@(%@)", columns, indexName, u, tableName)
+        return try execute(sql)
+    }
+    
+    public func dropIndex(_ indexName: String, tableName: String) throws -> Int {
+        let sql = "DROP INDEX \(indexName)"
         return try execute(sql)
     }
     
@@ -338,6 +364,7 @@ public class SQLiteConnection {
     ///
     /// - Parameter obj: The object to insert.
     /// - Returns: The number of rows added to the table.
+    /// - Throws: Exceptions.
     @discardableResult
     public func insert(_ obj: SQLiteTable?) throws -> Int {
         return try insert(obj, extra: "")
@@ -350,6 +377,7 @@ public class SQLiteConnection {
     ///
     /// - Parameter obj: The object to insert.
     /// - Returns: The number of rows modified.
+    /// - Throws: Exceptions.
     @discardableResult
     public func insertOrReplace(_ obj: SQLiteTable?) throws -> Int {
         return try insert(obj, extra: "OR REPLACE")
@@ -364,6 +392,7 @@ public class SQLiteConnection {
     ///   - obj: The object to insert.
     ///   - extra: Literal SQL code that gets placed into the command. INSERT {extra} INTO ...
     /// - Returns: The number of rows added to the table.
+    /// - Throws: Exceptions.
     @discardableResult
     public func insert(_ obj: SQLiteTable?, extra: String) throws -> Int {
         guard let object = obj else {
@@ -387,11 +416,12 @@ public class SQLiteConnection {
     /// Inserts all specified objects.
     ///
     /// - Parameters:
-    ///   - objects: Objects to insert
+    ///   - objects: Objects to insert.
     ///   - inTranscation: A boolean indicating if the inserts should be wrapped in a transaction.
     /// - Returns: The number of rows added to the table.
+    /// - Throws: Exceptions
     @discardableResult
-    public func insertAll(_ objects: [SQLiteTable], inTranscation: Bool = false) throws -> Int {
+    public func insertAll(_ objects: [SQLiteTable], inTranscation: Bool = true) throws -> Int {
         var result = 0
         if inTranscation {
             
@@ -411,7 +441,7 @@ public class SQLiteConnection {
     ///
     /// - Parameter obj: The object to update. It must have a primary key designated using the Attribute.isPK.
     /// - Returns: The number of rows updated.
-    /// - Throws: throws exception
+    /// - Throws: Exceptions
     @discardableResult
     public func update<T: SQLiteTable>(_ obj: T) throws -> Int {
         let map = getMapping(of: T.self)
@@ -432,7 +462,7 @@ public class SQLiteConnection {
     ///
     /// - Parameter obj: The object to delete. It must have a primary key designated using the Attribute.isPK.
     /// - Returns: The number of rows deleted.
-    /// - Throws: throws exception
+    /// - Throws: Exceptions
     @discardableResult
     public func delete(_ obj: SQLiteTable) throws -> Int {
         let map = getMapping(of: obj.mapType)
@@ -447,8 +477,8 @@ public class SQLiteConnection {
     /// Delete all table data
     ///
     /// - Parameter type: Type to reflect to a database table.
-    /// - Returns: Rows deleted
-    /// - Throws: throws exception
+    /// - Returns: Rows deleted.
+    /// - Throws: Exceptions.
     @discardableResult
     public func deleteAll<T: SQLiteTable>(_ type: T.Type) throws -> Int {
         return try deleteAll(map: getMapping(of: T.self))
@@ -469,7 +499,7 @@ public class SQLiteConnection {
     ///   - query: The fully escaped SQL.
     ///   - parameters: Arguments to substitute for the occurences of '?' in the query.
     /// - Returns: The number of rows modified in the database as a result of this execution.
-    /// - Throws: throws exception
+    /// - Throws: Exceptions
     public func executeScalar<T: SQLiteTable>(_ query: String, parameters: [Any] = []) throws -> T? {
         let cmd = createCommand(query, parameters: parameters)
         let t: T? = try cmd.executeScalar()
@@ -479,7 +509,7 @@ public class SQLiteConnection {
 
 extension SQLiteConnection {
     
-    internal func getMapping(of type: SQLiteTable.Type, createFlags: CreateFlags = .none) -> TableMapping {
+    func getMapping(of type: SQLiteTable.Type, createFlags: CreateFlags = .none) -> TableMapping {
         let key = String(describing: type)
         var map: TableMapping
         lock()
@@ -557,9 +587,9 @@ fileprivate class ColumnInfo: SQLiteTable {
         return []
     }
     
-    public let name: String
+    let name: String
     
-    public let notnull: Int
+    let notnull: Int
     
     required init() {
         name = ""
