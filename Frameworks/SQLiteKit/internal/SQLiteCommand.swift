@@ -46,17 +46,22 @@ class SQLiteCommand {
             if let name = bind.name {
                 bind.index = SQLite3.bindParameterIndex(stmt, name: name)
             } else {
-                index += 1
                 bind.index = index
             }
             try SQLiteCommand.bindParameter(stmt, index: index, value: bind.value)
+            index += 1
         }
     }
     
     @discardableResult
     static func bindParameter(_ stmt: SQLiteStatement, index: Int, value: Any?) throws -> Int {
+        
         let code: Int
         if let value = value {
+            // NOTE: When Any? is Option<Any> = nil, value == nil always retrun false.
+            if value is ExpressibleByNilLiteral {
+                return SQLite3.bindNull(stmt, index: index)
+            }
             switch value {
             case let v as String:
                 code = SQLite3.bindText(stmt, index: index, value: v)

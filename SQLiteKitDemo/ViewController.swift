@@ -40,19 +40,16 @@ class ViewController: UIViewController {
         var users: [User] = userQuery.limit(3).toList()
         print(users)
         
-//        let a: [User] = userQuery.filter(using: NSPredicate(format: "name = %@", "A"))
-//        if a.count > 0 {
-//
-//        }
+        let u = User()
+        u.userID = 2
+        u.name = "222"
+        u.age = 30
+        u.birthday = Date()
         
-//        let u = User()
-//        u.userID = 2
-//        u.name = "222"
+        try! db.upsert(u)
         
-        //try! db.upsert(u)
-        
-//        users = userQuery.limit(3).toList()
-//        print(users)
+        users = userQuery.limit(3).toList()
+        print(users)
     }
     
     fileprivate func insertUsers() {
