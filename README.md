@@ -5,7 +5,7 @@ a Swift version of SQLite library inspired by [SQLite-net](https://github.com/pr
 
 ## Features
 
-- [x] ORM 
+- [x] Manual or ORM 
 - [x] Auto table migration
 
 ## In-Progress

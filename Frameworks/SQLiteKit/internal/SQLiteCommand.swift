@@ -82,6 +82,8 @@ class SQLiteCommand {
                 code = SQLite3.bindText(stmt, index: index, value: v.absoluteString)
             case let v as Data:
                 code = SQLite3.bindBlob(stmt, index: index, value: v)
+            case let v as UUID:
+                code = SQLite3.bindText(stmt, index: index, value: v.uuidString)
             default:
                 throw SQLiteError.notSupportedError("Unsupported parameter type")
             }
@@ -94,7 +96,11 @@ class SQLiteCommand {
     func readColumn(_ stmt: SQLiteStatement, index: Int, columnType: SQLite3.ColumnType, type: Any.Type) -> Any? {
         switch columnType {
         case .Text:
-            return SQLite3.columnText(stmt, index: index)
+            let value = SQLite3.columnText(stmt, index: index)
+            if type is UUID.Type {
+                return UUID(uuidString: value)
+            }
+            return value
         case .Integer:
             let value = SQLite3.columnInt(stmt, index: index)
             if type is Bool.Type {

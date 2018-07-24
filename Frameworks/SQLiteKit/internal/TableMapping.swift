@@ -152,8 +152,12 @@ extension TableMapping.Column {
     fileprivate var SQLType: String {
         let mappings: [String: [Any.Type]] = [
             "INTEGER": [
-                Int.self, Int?.self,
-                Int64.self, Int64?.self,
+                Int8.self, Int8?.self,
+                Int16.self, Int16?.self,
+                UInt8.self, UInt8?.self,
+                UInt16.self, UInt16?.self,
+                Int.self, Int?.self, Int32.self, Int32?.self, Int64.self, Int64?.self,
+                UInt.self, UInt?.self, UInt32.self, UInt32?.self, UInt64.self, UInt64?.self,
                 Bool.self, Bool?.self
             ],
             "REAL": [

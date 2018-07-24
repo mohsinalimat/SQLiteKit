@@ -78,6 +78,14 @@ class ViewController: UIViewController {
 
 class User: SQLiteTable, CustomStringConvertible {
     
+    enum CodingKeys: String, CodingKey {
+        case userID = "user_id"
+        case name
+        case age
+        case birthday
+        case avatarData = "avatar_data"
+    }
+    
     var userID: Int
     
     var name: String
