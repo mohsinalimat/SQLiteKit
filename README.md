@@ -137,6 +137,7 @@ public func update(_ obj: SQLiteTable) -> Int
 ```swift
 public func delete(_ obj: SQLiteTable) -> Int
 public func deleteAll<T: SQLiteTable>(_ type: T.Type) -> Int
+public func delete(using predicate: NSPredicate, on table: SQLiteCodable.Type) -> Int
 ```
 
 ## Author
