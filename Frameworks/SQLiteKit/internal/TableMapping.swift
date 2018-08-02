@@ -41,7 +41,7 @@ struct TableMapping {
         return autoIncPK != nil
     }
     
-    init(type: SQLiteTable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
+    init(type: SQLiteCodable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
         let attributes = type.attributes()
         
         if let nameAttribute = attributes.first(where: { $0.attribute == .tableName }) {
@@ -51,9 +51,16 @@ struct TableMapping {
         }
         self.createFlags = createFlags
         
+        let ignoredColumnNames: [String] = attributes.filter { return $0.attribute == .ignore }.map { return $0.name }
+        
         var cols: [Column] = []
         let mirror = Mirror(reflecting: type.init())
         for child in mirror.children {
+            
+            if let label = child.label, ignoredColumnNames.contains(label) {
+                continue
+            }
+            
             let col = Column(propertyInfo: child, attributes: attributes)
             cols.append(col)
             // TODO: If we support nested table model, we should check
@@ -61,8 +68,8 @@ struct TableMapping {
             //print(m.displayStyle)
         }
         columns = cols
-        insertColumns = columns.filter { return $0.isAutoInc == false || !$0.ignored }
-        insertOrReplaceColumns = columns.filter { return !$0.ignored }
+        insertColumns = columns.filter { return $0.isAutoInc == false }
+        insertOrReplaceColumns = columns
         
         for c in cols {
             if c.isPK && c.isAutoInc {
@@ -124,7 +131,7 @@ struct TableMapping {
         ///
         /// - Parameter object: object
         /// - Returns: object value of the column
-        func getValue(of object: SQLiteTable) -> Any {
+        func getValue(of object: SQLiteCodable) -> Any {
             let mirror = Mirror(reflecting: object)
             return mirror.children.first(where: { $0.label == name })!.value
         }
@@ -152,18 +159,15 @@ extension TableMapping.Column {
     fileprivate var SQLType: String {
         let mappings: [String: [Any.Type]] = [
             "INTEGER": [
-                Int8.self, Int8?.self,
-                Int16.self, Int16?.self,
-                UInt8.self, UInt8?.self,
-                UInt16.self, UInt16?.self,
-                Int.self, Int?.self, Int32.self, Int32?.self, Int64.self, Int64?.self,
-                UInt.self, UInt?.self, UInt32.self, UInt32?.self, UInt64.self, UInt64?.self,
+                Int.self, Int?.self,
+                Int64.self, Int64?.self,
                 Bool.self, Bool?.self
             ],
             "REAL": [
                 Float.self, Float?.self,
                 Double.self, Double?.self,
-                Date.self, Date?.self
+                Date.self, Date?.self,
+                CGFloat.self, CGFloat?.self
             ],
             "TEXT": [
                 String.self, String?.self,
