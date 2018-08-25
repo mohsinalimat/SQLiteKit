@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 enum SQLiteDataType: String {
     case INTEGER
     case REAL
@@ -41,7 +39,7 @@ struct TableMapping {
         return autoIncPK != nil
     }
     
-    init(type: SQLiteCodable.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
+    init<T: SQLiteCodable>(type: T.Type, createFlags: SQLiteConnection.CreateFlags = .none) {
         let attributes = type.attributes()
         
         if let nameAttribute = attributes.first(where: { $0.attribute == .tableName }) {
@@ -51,21 +49,13 @@ struct TableMapping {
         }
         self.createFlags = createFlags
         
-        let ignoredColumnNames: [String] = attributes.filter { return $0.attribute == .ignore }.map { return $0.name }
+        //SQLiteDecoder.decode(T.CodingKeys.root.self)
         
         var cols: [Column] = []
         let mirror = Mirror(reflecting: type.init())
         for child in mirror.children {
-            
-            if let label = child.label, ignoredColumnNames.contains(label) {
-                continue
-            }
-            
             let col = Column(propertyInfo: child, attributes: attributes)
             cols.append(col)
-            // TODO: If we support nested table model, we should check
-            //let m = Mirror(reflecting: child.value)
-            //print(m.displayStyle)
         }
         columns = cols
         insertColumns = columns.filter { return $0.isAutoInc == false }
@@ -107,13 +97,11 @@ struct TableMapping {
         
         let isAutoInc: Bool
         
-        let ignored: Bool
-        
         let isIndexed: Bool
         
         let columnType: Any.Type
         
-        init(propertyInfo: Mirror.Child, attributes: [SQLiteAttribute]) {
+        init(propertyInfo: Mirror.Child, attributes: [AttributeInfo]) {
             let columnName = propertyInfo.label!
             name = columnName
             value = propertyInfo.value
@@ -121,7 +109,6 @@ struct TableMapping {
             let columnAttr = attributes.filter { $0.name == columnName }
             isPK = columnAttr.contains(where: { $0.attribute == Attribute.isPK })
             isAutoInc = columnAttr.contains(where: { $0.attribute == Attribute.autoInc })
-            ignored = columnAttr.contains(where: { $0.attribute == Attribute.ignore })
             isIndexed = columnAttr.contains(where: { $0.attribute == Attribute.indexed })
             columnType = type(of: propertyInfo.value)
         }
@@ -131,7 +118,7 @@ struct TableMapping {
         ///
         /// - Parameter object: object
         /// - Returns: object value of the column
-        func getValue(of object: SQLiteCodable) -> Any {
+        func getValue<Object: SQLiteCodable>(of object: Object) -> Any {
             let mirror = Mirror(reflecting: object)
             return mirror.children.first(where: { $0.label == name })!.value
         }

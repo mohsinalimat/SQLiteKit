@@ -182,65 +182,6 @@ public class SQLiteConnection {
         return try execute(sql)
     }
     
-    /// Executes a "create table if not exists" on the database. It also
-    /// creates any specified indexes on the columns of the table. It uses
-    /// a schema automatically generated from the specified type. You can
-    /// later access this schema by calling GetMapping.
-    ///
-    /// - Parameters:
-    ///   - type: Type to reflect to a database table
-    ///   - createFlags: Optional flags allowing implicit PK and indexes based on naming conventions
-    /// - Returns: Whether the table was created or migrated.
-    /// - Throws: throws exception
-    @discardableResult
-    public func createTable<T: SQLiteCodable>(_ type: T.Type, createFlags: CreateFlags = .none) throws -> CreateTableResult {
-        let map = getMapping(of: type, createFlags: createFlags)
-        if map.columns.count == 0 {
-            return CreateTableResult.noneColumnsFound
-        }
-        
-        let result: CreateTableResult
-        let existingCols = getExistingColumns(tableName: map.tableName)
-        if existingCols.count == 0 {
-            let fts3: Bool = (createFlags.rawValue & CreateFlags.fullTextSearch3.rawValue) != 0
-            let fts4: Bool = (createFlags.rawValue & CreateFlags.fullTextSearch4.rawValue) != 0
-            let fts5: Bool = (createFlags.rawValue & CreateFlags.fullTextSearch5.rawValue) != 0
-            let fts = fts3 || fts4 || fts5
-            let virtual = fts ? "VIRTUAL ": ""
-            
-            var using = ""
-            if fts3 {
-                using = "USING FTS3"
-            } else if fts4 {
-                using = "USING FTS4"
-            } else if fts5 {
-                using = "USING FTS5"
-            }
-            var sql = "CREATE \(virtual)TABLE IF NOT EXISTS \(map.tableName) \(using)("
-            let declarationList = map.columns.map { return $0.declaration }
-            let declaration = declarationList.joined(separator: ",")
-            sql += declaration
-            sql += ")"
-            if map.withoutRowId {
-                sql += " WITHOUT ROWID"
-            }
-            try execute(sql)
-            result = .created
-        } else {
-            // do the migration
-            try migrateTable(map, existingCols: existingCols)
-            result = .migrated
-        }
-        // create index
-        for column in map.columns {
-            if column.isIndexed {
-                
-            }
-        }
-        
-        return result
-    }
-    
     // MARK: - Index
     
     /// Creates an index for the specified table and columns.
@@ -306,8 +247,8 @@ public class SQLiteConnection {
     ///
     /// - Parameter pk: Value of table primary key
     /// - Returns: Object that match the primary. `nil` will return if not found.
-    public func find<T: SQLiteCodable>(_ pk: Any) -> T? {
-        let map = getMapping(of: T.self)
+    public func find<Object: SQLiteCodable>(_ pk: Any) -> Object? {
+        let map = getMapping(of: Object.self)
         return query(map.queryByPrimaryKeySQL, parameters: [pk]).first
     }
     
@@ -324,9 +265,9 @@ public class SQLiteConnection {
     /// Returns a queryable interface to the table represented by the given type.
     ///
     /// - Returns: A queryable object that is able to translate Where, OrderBy, and Take queries into native SQL.
-    public func table<T>() -> SQLiteTableQuery<T> where T: SQLiteCodable {
+    public func table<T>() -> TableQuery<T> where T: SQLiteCodable {
         let map = getMapping(of: T.self)
-        return SQLiteTableQuery<T>(connection: self, table: map)
+        return TableQuery<T>(connection: self, table: map)
     }
     
     
@@ -334,9 +275,9 @@ public class SQLiteConnection {
     ///
     /// - Parameter Type to reflect to a database table
     /// - Returns: A queryable object that is able to translate Where, OrderBy, and Take queries into native SQL.
-    public func table<T>(of type: SQLiteCodable.Type) -> SQLiteTableQuery<T> where T: SQLiteCodable {
+    public func table<T: SQLiteCodable>(of type: T.Type) -> TableQuery<T> where T: SQLiteCodable {
         let map = getMapping(of: type)
-        return SQLiteTableQuery<T>(connection: self, table: map)
+        return TableQuery<T>(connection: self, table: map)
     }
     
     // MARK: - Transcation
@@ -366,7 +307,7 @@ public class SQLiteConnection {
         
     }
     
-    func saveTranscationPoint() -> String {
+    public func saveTranscationPoint() -> String {
         let depth = _transcationCounter.incrementAndGet() - 1
         let ret = "S_" + UUID().uuidString + "_" + String(depth)
         do {
@@ -383,161 +324,6 @@ public class SQLiteConnection {
     
     public func runInTranscation(_ block: () -> Void) {
         
-    }
-    
-    // MARK: - Insert
-    
-    /// Inserts the given object (and updates its auto incremented primary key if it has one).
-    /// The return value is the number of rows added to the table.
-    ///
-    /// - Parameter obj: The object to insert.
-    /// - Returns: The number of rows added to the table.
-    /// - Throws: Exceptions.
-    @discardableResult
-    public func insert(_ obj: SQLiteCodable?) throws -> Int {
-        return try insert(obj, extra: "")
-    }
-    
-    
-    /// Inserts the given object (and updates its auto incremented primary key if it has one).
-    /// The return value is the number of rows added to the table.
-    /// If a UNIQUE constraint violation occurs with some pre-existing object, this function deletes the old objects
-    ///
-    /// - Parameter obj: The object to insert.
-    /// - Returns: The number of rows modified.
-    /// - Throws: Exceptions.
-    @discardableResult
-    public func insertOrReplace(_ obj: SQLiteCodable?) throws -> Int {
-        return try insert(obj, extra: "OR REPLACE")
-    }
-    
-    
-    /// Inserts the given object (and updates its
-    /// auto incremented primary key if it has one).
-    /// The return value is the number of rows added to the table.
-    ///
-    /// - Parameters:
-    ///   - obj: The object to insert.
-    ///   - extra: Literal SQL code that gets placed into the command. INSERT {extra} INTO ...
-    /// - Returns: The number of rows added to the table.
-    /// - Throws: Exceptions.
-    @discardableResult
-    public func insert(_ obj: SQLiteCodable?, extra: String) throws -> Int {
-        guard let object = obj else {
-            return 0
-        }
-        let map = getMapping(of: object.mapType)
-        let isReplacing = extra.uppercased() == "OR REPLACE"
-        let columns = isReplacing ? map.insertOrReplaceColumns: map.insertColumns
-        
-        let values: [Any] = columns.map { return $0.getValue(of: object) }
-        let cmd = getInsertCommand(map: map, extra: extra)
-        let rows = try cmd.executeNonQuery(values)
-        if map.hasAutoIncPK {
-            let id = SQLite3.lastInsertRowid(handle)
-            map.setAutoIncPK(id)
-        }
-        return rows
-    }
-    
-    
-    /// Inserts all specified objects.
-    ///
-    /// - Parameters:
-    ///   - objects: Objects to insert.
-    ///   - inTranscation: A boolean indicating if the inserts should be wrapped in a transaction.
-    /// - Returns: The number of rows added to the table.
-    /// - Throws: Exceptions
-    @discardableResult
-    public func insertAll(_ objects: [SQLiteCodable], inTranscation: Bool = false) throws -> Int {
-        var result = 0
-        if inTranscation {
-            
-        } else {
-            for obj in objects {
-                result += try insert(obj)
-            }
-        }
-        return result
-    }
-    
-    // MARK: - Update
-    
-    /// Updates all of the columns of a table using the specified object
-    /// except for its primary key.
-    /// The object is required to have a primary key.
-    ///
-    /// - Parameter obj: The object to update. It must have a primary key designated using the Attribute.isPK.
-    /// - Returns: The number of rows updated.
-    /// - Throws: Exceptions
-    @discardableResult
-    public func update<T: SQLiteCodable>(_ obj: T) throws -> Int {
-        let map = getMapping(of: T.self)
-        guard let pk = map.pk else {
-            throw SQLiteError.notSupportedError("Could not update table without primary key")
-        }
-        let cols = map.columns.filter { return $0.isPK == false }
-        let sets = cols.map { return "\($0.name) = ?" }.joined(separator: ",")
-        var values: [Any] = cols.map { return $0.getValue(of: obj) }
-        values.append(pk.getValue(of: obj))
-        let sql = String(format: "UPDATE %@ SET %@ WHERE %@ = ?", map.tableName, sets, pk.name)
-        return try execute(sql, parameters: values)
-    }
-    
-    @discardableResult
-    public func upsert<T: SQLiteCodable>(_ obj: T) throws -> Int {
-        if SQLiteConnection.libVersionNumber > 3024000 {
-            // TODO
-        } else {
-            // create two statements
-            let result = try insert(obj, extra: "OR IGNORE")
-            if result == 0 {
-                return try update(obj)
-            }
-            return result
-        }
-        return 0
-    }
-    
-    // MARK: - Delete
-    
-    /// Deletes the given object from the database using its primary key.
-    ///
-    /// - Parameter obj: The object to delete. It must have a primary key designated using the Attribute.isPK.
-    /// - Returns: The number of rows deleted.
-    /// - Throws: Exceptions
-    @discardableResult
-    public func delete(_ obj: SQLiteCodable) throws -> Int {
-        let map = getMapping(of: obj.mapType)
-        guard let pk = map.pk else {
-            throw SQLiteError.notSupportedError("Could not delete row without primary key")
-        }
-        let sql = "DELETE FROM \(map.tableName) WHERE \(pk.name) = ?"
-        return try execute(sql, parameters: [pk.value])
-    }
-    
-    
-    /// Delete all table data
-    ///
-    /// - Parameter type: Type to reflect to a database table.
-    /// - Returns: Rows deleted.
-    /// - Throws: Exceptions.
-    @discardableResult
-    public func deleteAll<T: SQLiteCodable>(_ type: T.Type) throws -> Int {
-        return try deleteAll(map: getMapping(of: T.self))
-    }
-    
-    @discardableResult
-    public func delete(using predicate: NSPredicate, on table: SQLiteCodable.Type) throws -> Int {
-        let map = getMapping(of: table)
-        let sql = "DELETE FROM \(map.tableName) WHERE \(predicate.predicateFormat)"
-        return try execute(sql)
-    }
-    
-    @discardableResult
-    fileprivate func deleteAll(map: TableMapping) throws -> Int {
-        let sql = "DELETE FROM \(map.tableName)"
-        return try execute(sql)
     }
     
     /// Creates a SQLiteCommand given the command text (SQL) with arguments. Place a '?'
@@ -559,7 +345,7 @@ public class SQLiteConnection {
 
 extension SQLiteConnection {
     
-    func getMapping(of type: SQLiteCodable.Type, createFlags: CreateFlags = .none) -> TableMapping {
+    internal func getMapping<T: SQLiteCodable>(of type: T.Type, createFlags: CreateFlags = .none) -> TableMapping {
         let key = String(describing: type)
         var map: TableMapping
         lock()
@@ -578,7 +364,7 @@ extension SQLiteConnection {
         return map
     }
     
-    fileprivate func migrateTable(_ map: TableMapping, existingCols: [ColumnInfo]) throws {
+    internal func migrateTable(_ map: TableMapping, existingCols: [_ColumnInfo]) throws {
         var newCols: [TableMapping.Column] = []
         for column in map.columns {
             if let _ = existingCols.first(where: { $0.name == column.name }) {
@@ -592,13 +378,13 @@ extension SQLiteConnection {
         }
     }
     
-    fileprivate func getExistingColumns(tableName: String) -> [ColumnInfo] {
+    internal func getExistingColumns(tableName: String) -> [_ColumnInfo] {
         let sql = String(format: "pragma table_info(%@)", tableName)
         return query(sql)
     }
     
-    func createCommand(_ cmdText: String, parameters: [Any]) -> SQLiteCommand {
-        let cmd = SQLiteCommand(connection: self)
+    internal func createCommand(_ cmdText: String, parameters: [Any]) -> Command {
+        let cmd = Command(connection: self)
         cmd.commandText = cmdText
         for param in parameters {
             cmd.bind(param)
@@ -606,7 +392,7 @@ extension SQLiteConnection {
         return cmd
     }
     
-    fileprivate func getInsertCommand(map: TableMapping, extra: String) -> PreparedSqliteInsertCommand {
+    internal func getInsertCommand(map: TableMapping, extra: String) -> PreparedSqliteInsertCommand {
         var columns = map.insertColumns
         let sql: String
         if columns.count == 0 && map.columns.count == 1 && map.columns.first?.isAutoInc == true {
@@ -631,9 +417,15 @@ extension SQLiteConnection {
     }
 }
 
-fileprivate class ColumnInfo: SQLiteCodable {
+internal class _ColumnInfo: SQLiteCodable {
     
-    static func attributes() -> [SQLiteAttribute] {
+    enum CodingKeys: String, SQLiteCodingKey {
+        typealias root = _ColumnInfo
+        case name
+        case notnull
+    }
+    
+    static func attributes() -> [AttributeInfo] {
         return []
     }
     
